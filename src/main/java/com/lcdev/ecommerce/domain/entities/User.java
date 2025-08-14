@@ -10,11 +10,10 @@ import java.util.List;
 import java.util.Set;
 
 @Data
-@Builder
 @Entity
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Table(name = "tb_user")
 public class User {
 

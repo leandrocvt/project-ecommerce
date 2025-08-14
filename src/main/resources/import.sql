@@ -1,4 +1,5 @@
 INSERT INTO tb_user (first_name, last_name, email, phone, password, birth_date, cpf) VALUES ('Maria', 'Brown', 'maria@gmail.com', '988888888', '123456', '2001-07-25', '12345678911');
+INSERT INTO tb_user (first_name, last_name, email, phone, password, birth_date, cpf) VALUES ('Joao', 'Brown', 'Joao@gmail.com', '988888888', '123456', '2001-07-25', '12345678911');
 
 INSERT INTO tb_address (road, neighborhood, city, state, zip_code, number, complement, user_id) VALUES ('Av Fernandez', 'Parque Paulista', 'Franco da Rocha', 'SP', '123-4567', '176', 'Próximo ao mercado Don Juan', 1);
 
