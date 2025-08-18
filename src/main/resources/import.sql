@@ -7,7 +7,28 @@ INSERT INTO tb_category(name, parent_id) VALUES ('Camisetas', NULL);
 INSERT INTO tb_category(name, parent_id) VALUES ('Calças', NULL);
 INSERT INTO tb_category(name, parent_id) VALUES ('Jaquetas', NULL);
 
-INSERT INTO tb_product (name, price, description, img_urls, stock_quantity, category_id) VALUES ('Camiseta Polo', 99.90, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', '["https://exemplo.com/imagem1.jpg", "https://exemplo.com/imagem2.jpg"]', 30, 1);
+INSERT INTO tb_category (id, name, parent_id) VALUES (4, 'Polo', 1);
+INSERT INTO tb_category (id, name, parent_id) VALUES (5, 'Oversized', 1);
+INSERT INTO tb_category (id, name, parent_id) VALUES (6, 'Regata', 1);
+INSERT INTO tb_category (id, name, parent_id) VALUES (7, 'Casual', 1);
+
+INSERT INTO tb_product (name, base_price, description, category_id) VALUES ('Camiseta Polo', 99.90, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit...', 4);
+
+INSERT INTO tb_product_variation (color, size, price_adjustment, stock_quantity, product_id) VALUES ('PRETO', 'M', 0.00, 20, 1);
+INSERT INTO tb_product_variation (color, size, price_adjustment, stock_quantity, product_id) VALUES ('PRETO', 'G', 5.00, 15, 1);
+INSERT INTO tb_product_variation (color, size, price_adjustment, stock_quantity, product_id) VALUES ('BRANCO', 'M', 0.00, 10, 1);
+
+-- imagens da variação BLACK M (id=1, supondo autoincrement começando em 1)
+INSERT INTO tb_product_variation_images (variation_id, img_url) VALUES (1, 'https://exemplo.com/polo-preta-m-frente.jpg');
+INSERT INTO tb_product_variation_images (variation_id, img_url) VALUES (1, 'https://exemplo.com/polo-preta-m-costas.jpg');
+
+-- imagens da variação BLACK G (id=2)
+INSERT INTO tb_product_variation_images (variation_id, img_url) VALUES (2, 'https://exemplo.com/polo-preta-g-frente.jpg');
+INSERT INTO tb_product_variation_images (variation_id, img_url) VALUES (2, 'https://exemplo.com/polo-preta-g-costas.jpg');
+
+-- imagens da variação WHITE M (id=3)
+INSERT INTO tb_product_variation_images (variation_id, img_url) VALUES (3, 'https://exemplo.com/polo-branca-m-frente.jpg');
+INSERT INTO tb_product_variation_images (variation_id, img_url) VALUES (3, 'https://exemplo.com/polo-branca-m-costas.jpg');
 
 INSERT INTO tb_order (moment, status, client_id) VALUES (TIMESTAMP WITH TIME ZONE '2022-07-25T13:00:00Z', 1, 1);
 

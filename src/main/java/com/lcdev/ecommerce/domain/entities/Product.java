@@ -3,34 +3,47 @@ package com.lcdev.ecommerce.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Data
 @Builder
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Table(name = "tb_product")
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, length = 80)
     private String name;
-    @Column(columnDefinition = "TEXT")
+
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
-    private Double price;
-    private List<String> imgUrls;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal basePrice;
+
+    @Transient
     private Integer stockQuantity;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @OneToMany(mappedBy = "id.product")
     private Set<OrderItem> items = new HashSet<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductVariation> variations = new ArrayList<>();
+
+    public Integer getStockQuantity() {
+        return variations.stream()
+                .mapToInt(ProductVariation::getStockQuantity)
+                .sum();
+    }
 
 }
