@@ -1,6 +1,7 @@
 package com.lcdev.ecommerce.application.dto;
 
 import com.lcdev.ecommerce.domain.entities.Product;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,6 +30,8 @@ public class ProductRequestDTO {
     @NotNull(message = "Categoria requerida!")
     private Long categoryId;
 
-    private List<ProductVariationDTO> variations;
+    @NotEmpty(message = "O produto precisa ter pelo menos uma variação!")
+    @Size(min = 1, message = "O produto precisa ter pelo menos uma variação!")
+    private List<@Valid ProductVariationDTO> variations;
 
 }

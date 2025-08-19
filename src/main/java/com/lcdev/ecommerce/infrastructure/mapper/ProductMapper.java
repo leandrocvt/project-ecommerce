@@ -9,4 +9,5 @@ public interface ProductMapper {
     Product toEntity(ProductRequestDTO dto, Category category);
 
     ProductResponseDTO toResponseDTO(Product entity);
+
 }

@@ -5,9 +5,15 @@ import com.lcdev.ecommerce.application.dto.ProductResponseDTO;
 import com.lcdev.ecommerce.domain.entities.Category;
 import com.lcdev.ecommerce.domain.entities.Product;
 import com.lcdev.ecommerce.domain.entities.ProductVariation;
+import com.lcdev.ecommerce.domain.entities.ProductVariationImage;
 import com.lcdev.ecommerce.infrastructure.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -29,8 +35,22 @@ public class ProductMapperImpl implements ProductMapper {
                         variation.setSize(variationDTO.getSize());
                         variation.setPriceAdjustment(variationDTO.getPriceAdjustment());
                         variation.setStockQuantity(variationDTO.getStockQuantity());
-                        variation.setImgUrls(variationDTO.getImgUrls());
+                        variation.setDiscountAmount(Optional.ofNullable(variationDTO.getDiscountAmount())
+                                .orElse(BigDecimal.ZERO));
                         variation.setProduct(entity);
+
+                        if (Objects.nonNull(variationDTO.getImages())) {
+                            List<ProductVariationImage> images = variationDTO.getImages().stream()
+                                    .map(imgDTO -> {
+                                        ProductVariationImage img = new ProductVariationImage();
+                                        img.setImgUrl(imgDTO.getImgUrl());
+                                        img.setPrimary(imgDTO.isPrimary());
+                                        img.setVariation(variation);
+                                        return img;
+                                    }).toList();
+                            variation.setImages(images);
+                        }
+
                         return variation;
                     }).toList()
             );
@@ -43,4 +63,5 @@ public class ProductMapperImpl implements ProductMapper {
     public ProductResponseDTO toResponseDTO(Product entity) {
         return new ProductResponseDTO(entity);
     }
+
 }

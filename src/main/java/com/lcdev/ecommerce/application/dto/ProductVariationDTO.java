@@ -3,6 +3,7 @@ package com.lcdev.ecommerce.application.dto;
 import com.lcdev.ecommerce.domain.entities.ProductVariation;
 import com.lcdev.ecommerce.domain.enums.Color;
 import com.lcdev.ecommerce.domain.enums.Size;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -26,22 +28,30 @@ public class ProductVariationDTO {
     @NotNull(message = "O tamanho da variação é obrigatório.")
     private Size size;
 
-    @DecimalMin(value = "0.0", inclusive = false, message = "O preço deve ser positivo.")
+    @PositiveOrZero(message = "O ajuste de preço não pode ser negativo.")
     private BigDecimal priceAdjustment;
+
+    @PositiveOrZero(message = "O desconto não pode ser negativo.")
+    private BigDecimal discountAmount;
 
     @NotNull(message = "Quantidade em estoque é obrigatória.")
     @PositiveOrZero(message = "Estoque não pode ser negativo.")
     private Integer stockQuantity;
 
-    private List<String> imgUrls;
+    private List<ProductVariationImageDTO> images;
 
     public ProductVariationDTO(ProductVariation variation) {
         id = variation.getId();
         color = variation.getColor();
         size = variation.getSize();
         priceAdjustment = variation.getPriceAdjustment();
+        discountAmount = variation.getDiscountAmount();
         stockQuantity = variation.getStockQuantity();
-        imgUrls = variation.getImgUrls();
+        if (Objects.nonNull(variation.getImages())) {
+            images = variation.getImages().stream()
+                    .map(img -> new ProductVariationImageDTO(img.getImgUrl(), img.isPrimary()))
+                    .toList();
+        }
     }
 
 }
