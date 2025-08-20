@@ -10,7 +10,9 @@ import com.lcdev.ecommerce.infrastructure.projections.ProductMinProjection;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -44,10 +46,25 @@ public class ProductController {
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) Size size,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int sizePage,
+            @RequestParam(defaultValue = "relevance") String sort
+    ) {
+        Sort sorting = switch (sort) {
+            case "highestPrice" -> Sort.by(Sort.Direction.DESC, "finalPrice");
+            case "lowestPrice" -> Sort.by(Sort.Direction.ASC, "finalPrice");
+            case "biggestDiscount" -> Sort.by(Sort.Direction.DESC, "discountPercent");
+            default -> Sort.by(Sort.Direction.ASC, "name");
+        };
 
-        Page<ProductMinResponse> page = service.search(name, categoryId, minPrice, maxPrice, size, pageable);
-        return ResponseEntity.ok(PageResponse.from(page));
+        Pageable pageable = PageRequest.of(page, sizePage, sorting);
+
+        Page<ProductMinResponse> result = service.search(
+                name, categoryId, minPrice, maxPrice, size, sort, pageable
+        );
+
+        return ResponseEntity.ok(PageResponse.from(result));
     }
+
 
 }

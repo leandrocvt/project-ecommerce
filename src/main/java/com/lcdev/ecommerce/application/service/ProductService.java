@@ -47,10 +47,11 @@ public class ProductService {
             BigDecimal minPrice,
             BigDecimal maxPrice,
             Size size,
+            String sort,
             Pageable pageable) {
 
         String sizeParam = size != null ? size.name() : null;
-        return repository.search(name, categoryId, minPrice, maxPrice, sizeParam, pageable)
+        return repository.search(name, categoryId, minPrice, maxPrice, sizeParam, sort, pageable)
                 .map(ProductMinResponse::from);
     }
 
