@@ -7,6 +7,7 @@ import com.lcdev.ecommerce.domain.entities.Product;
 import com.lcdev.ecommerce.domain.entities.ProductVariation;
 import com.lcdev.ecommerce.domain.entities.ProductVariationImage;
 import com.lcdev.ecommerce.infrastructure.mapper.ProductMapper;
+import com.lcdev.ecommerce.infrastructure.mapper.ProductVariationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ProductMapperImpl implements ProductMapper {
 
+    private final ProductVariationMapper productVariationMapper;
+
     @Override
     public Product toEntity(ProductRequestDTO dto, Category category) {
         Product entity = new Product();
@@ -27,37 +30,17 @@ public class ProductMapperImpl implements ProductMapper {
         entity.setBasePrice(dto.getBasePrice());
         entity.setCategory(category);
 
-        if (dto.getVariations() != null) {
-            entity.setVariations(
-                    dto.getVariations().stream().map(variationDTO -> {
-                        ProductVariation variation = new ProductVariation();
-                        variation.setColor(variationDTO.getColor());
-                        variation.setSize(variationDTO.getSize());
-                        variation.setPriceAdjustment(variationDTO.getPriceAdjustment());
-                        variation.setStockQuantity(variationDTO.getStockQuantity());
-                        variation.setDiscountAmount(Optional.ofNullable(variationDTO.getDiscountAmount())
-                                .orElse(BigDecimal.ZERO));
-                        variation.setProduct(entity);
-
-                        if (Objects.nonNull(variationDTO.getImages())) {
-                            List<ProductVariationImage> images = variationDTO.getImages().stream()
-                                    .map(imgDTO -> {
-                                        ProductVariationImage img = new ProductVariationImage();
-                                        img.setImgUrl(imgDTO.getImgUrl());
-                                        img.setPrimary(imgDTO.isPrimary());
-                                        img.setVariation(variation);
-                                        return img;
-                                    }).toList();
-                            variation.setImages(images);
-                        }
-
-                        return variation;
-                    }).toList()
-            );
-        }
+        productVariationMapper.updateVariations(dto, entity);
 
         return entity;
     }
+
+    public void updateBasicFields(ProductRequestDTO dto, Product entity) {
+        if (dto.getName() != null) entity.setName(dto.getName());
+        if (dto.getDescription() != null) entity.setDescription(dto.getDescription());
+        if (dto.getBasePrice() != null) entity.setBasePrice(dto.getBasePrice());
+    }
+
 
     @Override
     public ProductResponseDTO toResponseDTO(Product entity) {

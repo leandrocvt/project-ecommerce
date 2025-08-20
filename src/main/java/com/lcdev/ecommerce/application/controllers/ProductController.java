@@ -1,9 +1,6 @@
 package com.lcdev.ecommerce.application.controllers;
 
-import com.lcdev.ecommerce.application.dto.PageResponse;
-import com.lcdev.ecommerce.application.dto.ProductMinResponse;
-import com.lcdev.ecommerce.application.dto.ProductRequestDTO;
-import com.lcdev.ecommerce.application.dto.ProductResponseDTO;
+import com.lcdev.ecommerce.application.dto.*;
 import com.lcdev.ecommerce.application.service.ProductService;
 import com.lcdev.ecommerce.domain.enums.Size;
 import com.lcdev.ecommerce.infrastructure.projections.ProductMinProjection;
@@ -37,6 +34,12 @@ public class ProductController {
                 .toUri();
 
         return ResponseEntity.created(uri).body(newDto);
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<ProductResponseDTO> update(@Valid @RequestBody ProductRequestDTO dto, @PathVariable Long id){
+        ProductResponseDTO newDto = service.update(id, dto);
+        return ResponseEntity.ok(newDto);
     }
 
     @GetMapping

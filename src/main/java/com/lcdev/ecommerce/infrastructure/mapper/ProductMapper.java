@@ -7,7 +7,6 @@ import com.lcdev.ecommerce.domain.entities.Product;
 public interface ProductMapper {
 
     Product toEntity(ProductRequestDTO dto, Category category);
-
     ProductResponseDTO toResponseDTO(Product entity);
-
+    void updateBasicFields(ProductRequestDTO dto, Product entity);
 }
