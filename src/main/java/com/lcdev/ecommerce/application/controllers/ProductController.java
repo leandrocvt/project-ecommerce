@@ -3,7 +3,6 @@ package com.lcdev.ecommerce.application.controllers;
 import com.lcdev.ecommerce.application.dto.*;
 import com.lcdev.ecommerce.application.service.ProductService;
 import com.lcdev.ecommerce.domain.enums.Size;
-import com.lcdev.ecommerce.infrastructure.projections.ProductMinProjection;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -43,7 +42,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<ProductMinResponse>> findAll(
+    public ResponseEntity<PageResponse<ProductMinResponseDTO>> findAll(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) BigDecimal minPrice,
@@ -62,12 +61,11 @@ public class ProductController {
 
         Pageable pageable = PageRequest.of(page, sizePage, sorting);
 
-        Page<ProductMinResponse> result = service.search(
+        Page<ProductMinResponseDTO> result = service.search(
                 name, categoryId, minPrice, maxPrice, size, sort, pageable
         );
 
         return ResponseEntity.ok(PageResponse.from(result));
     }
-
 
 }

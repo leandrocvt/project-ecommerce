@@ -40,6 +40,9 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductVariation> variations = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Assessment> assessments = new ArrayList<>();
+
     public Integer getStockQuantity() {
         return variations.stream()
                 .mapToInt(ProductVariation::getStockQuantity)

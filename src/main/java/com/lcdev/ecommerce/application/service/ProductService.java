@@ -1,6 +1,7 @@
 package com.lcdev.ecommerce.application.service;
 
-import com.lcdev.ecommerce.application.dto.ProductMinResponse;
+import com.lcdev.ecommerce.application.dto.ProductDetailsResponseDTO;
+import com.lcdev.ecommerce.application.dto.ProductMinResponseDTO;
 import com.lcdev.ecommerce.application.dto.ProductRequestDTO;
 import com.lcdev.ecommerce.application.dto.ProductResponseDTO;
 import com.lcdev.ecommerce.application.service.exceptions.BusinessException;
@@ -10,16 +11,21 @@ import com.lcdev.ecommerce.domain.entities.Product;
 import com.lcdev.ecommerce.domain.enums.Size;
 import com.lcdev.ecommerce.infrastructure.mapper.ProductMapper;
 import com.lcdev.ecommerce.infrastructure.mapper.ProductVariationMapper;
+import com.lcdev.ecommerce.infrastructure.projections.AssessmentProjection;
+import com.lcdev.ecommerce.infrastructure.repositories.AssessmentRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.CategoryRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -27,13 +33,13 @@ import java.util.Objects;
 public class ProductService {
 
     private final ProductRepository repository;
+    private final CategoryRepository categoryRepository;
+    private final AssessmentRepository assessmentRepository;
     private final ProductMapper productMapper;
     private final ProductVariationMapper productVariationMapper;
-    private final CategoryRepository categoryRepository;
 
     @Transactional
     public ProductResponseDTO save(ProductRequestDTO dto){
-
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + dto.getCategoryId()));
 
@@ -67,7 +73,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductMinResponse> search(
+    public Page<ProductMinResponseDTO> search(
             String name,
             Long categoryId,
             BigDecimal minPrice,
@@ -78,7 +84,7 @@ public class ProductService {
 
         String sizeParam = size != null ? size.name() : null;
         return repository.search(name, categoryId, minPrice, maxPrice, sizeParam, sort, pageable)
-                .map(ProductMinResponse::from);
+                .map(ProductMinResponseDTO::from);
     }
 
     private void validateVariations(Product product) {

@@ -49,7 +49,7 @@ public class ProductVariationDTO {
         stockQuantity = variation.getStockQuantity();
         if (Objects.nonNull(variation.getImages())) {
             images = variation.getImages().stream()
-                    .map(img -> new ProductVariationImageDTO(img.getImgUrl(), img.isPrimary()))
+                    .map(img -> new ProductVariationImageDTO(img.getId(), img.getImgUrl(), img.isPrimary()))
                     .toList();
         }
     }

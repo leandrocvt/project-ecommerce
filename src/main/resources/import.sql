@@ -32,3 +32,6 @@ INSERT INTO tb_order (moment, status, client_id) VALUES (TIMESTAMP WITH TIME ZON
 INSERT INTO tb_order_item (order_id, product_id, quantity, price) VALUES (1, 1, 2, 99.90);
 
 INSERT INTO tb_payment (order_id, moment) VALUES (1, TIMESTAMP WITH TIME ZONE '2022-07-25T15:00:00Z');
+
+INSERT INTO tb_assessment (score, product_id, user_id, comment, photo_url, created_at) VALUES (4.0, 1, 1, 'Produto ótimo, confortável', 'https://exemplo.com', '2022-07-25T13:00:00Z')
+INSERT INTO tb_assessment (score, product_id, user_id, comment, photo_url, created_at) VALUES (5.0, 1, 2, 'Produto ótimo, confortável', 'https://exemplo.com', '2025-07-25T13:00:00Z')

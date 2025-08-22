@@ -4,17 +4,10 @@ import com.lcdev.ecommerce.application.dto.ProductRequestDTO;
 import com.lcdev.ecommerce.application.dto.ProductResponseDTO;
 import com.lcdev.ecommerce.domain.entities.Category;
 import com.lcdev.ecommerce.domain.entities.Product;
-import com.lcdev.ecommerce.domain.entities.ProductVariation;
-import com.lcdev.ecommerce.domain.entities.ProductVariationImage;
 import com.lcdev.ecommerce.infrastructure.mapper.ProductMapper;
 import com.lcdev.ecommerce.infrastructure.mapper.ProductVariationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
