@@ -12,15 +12,18 @@ import com.lcdev.ecommerce.domain.enums.Size;
 import com.lcdev.ecommerce.infrastructure.mapper.ProductMapper;
 import com.lcdev.ecommerce.infrastructure.mapper.ProductVariationMapper;
 import com.lcdev.ecommerce.infrastructure.projections.AssessmentProjection;
+import com.lcdev.ecommerce.infrastructure.projections.ProductVariationImageProjection;
+import com.lcdev.ecommerce.infrastructure.projections.ProductVariationProjection;
+import com.lcdev.ecommerce.infrastructure.projections.ReviewSummaryProjection;
 import com.lcdev.ecommerce.infrastructure.repositories.AssessmentRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.CategoryRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.ProductRepository;
+import com.lcdev.ecommerce.infrastructure.repositories.ProductVariationImageRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +36,7 @@ import java.util.Objects;
 public class ProductService {
 
     private final ProductRepository repository;
+    private final ProductVariationImageRepository imageRepository;
     private final CategoryRepository categoryRepository;
     private final AssessmentRepository assessmentRepository;
     private final ProductMapper productMapper;
@@ -85,6 +89,28 @@ public class ProductService {
         String sizeParam = size != null ? size.name() : null;
         return repository.search(name, categoryId, minPrice, maxPrice, sizeParam, sort, pageable)
                 .map(ProductMinResponseDTO::from);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductDetailsResponseDTO findById(Long productId) {
+
+        List<ProductVariationProjection> variations = repository.findProductWithVariations(productId);
+        if (variations.isEmpty()) {
+            throw new EntityNotFoundException("Produto não encontrado");
+        }
+
+        List<Long> variationIds = variations.stream()
+                .map(ProductVariationProjection::getVariationId)
+                .toList();
+        List<ProductVariationImageProjection> images = imageRepository.findImagesByVariationIds(variationIds);
+
+        ReviewSummaryProjection summary = assessmentRepository.findReviewSummaryByProductId(productId);
+
+        List<AssessmentProjection> sample = assessmentRepository.findByProductId(
+                productId, PageRequest.of(0, 3)
+        ).getContent();
+
+        return productMapper.toDetailsDTO(variations, images, summary, sample);
     }
 
     private void validateVariations(Product product) {

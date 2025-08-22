@@ -16,4 +16,11 @@ public class ProductDetailsResponseDTO extends ProductResponseDTO{
     private Long totalReviews;
     private List<AssessmentResponseDTO> sampleReviews;
 
+    public ProductDetailsResponseDTO(Long id, String name, String description, BigDecimal basePrice, Long categoryId, Integer stockQuantity, List<ProductVariationDTO> variations, Double averageScore, Long totalReviews, List<AssessmentResponseDTO> sampleReviews) {
+        super(id, name, description, basePrice, categoryId, stockQuantity, variations);
+        this.averageScore = averageScore;
+        this.totalReviews = totalReviews;
+        this.sampleReviews = sampleReviews;
+    }
+
 }

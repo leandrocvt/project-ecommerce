@@ -2,6 +2,8 @@ package com.lcdev.ecommerce.infrastructure.repositories;
 
 import com.lcdev.ecommerce.domain.entities.Product;
 import com.lcdev.ecommerce.infrastructure.projections.ProductMinProjection;
+import com.lcdev.ecommerce.infrastructure.projections.ProductVariationImageProjection;
+import com.lcdev.ecommerce.infrastructure.projections.ProductVariationProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -92,6 +95,26 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @Param("sort") String sort,
             Pageable pageable
     );
+
+
+    @Query("""
+                SELECT 
+                    p.id AS productId,
+                    p.name AS name,
+                    p.description AS description,
+                    p.basePrice AS basePrice,
+                    p.category.id AS categoryId,
+                    v.id AS variationId,
+                    v.color AS color,
+                    v.size AS size,
+                    v.priceAdjustment AS priceAdjustment,
+                    v.discountAmount AS discountAmount,
+                    v.stockQuantity AS variationStock
+                FROM Product p
+                LEFT JOIN p.variations v
+                WHERE p.id = :productId
+            """)
+    List<ProductVariationProjection> findProductWithVariations(@Param("productId") Long productId);
 
 
 }
