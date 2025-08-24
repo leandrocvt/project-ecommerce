@@ -18,6 +18,7 @@ public class ProductResponseDTO {
     private String description;
     private BigDecimal basePrice;
     private Long categoryId;
+    private Boolean active;
     private Integer stockQuantity;
     private List<ProductVariationDTO> variations;
 
@@ -27,6 +28,7 @@ public class ProductResponseDTO {
         description = product.getDescription();
         basePrice = product.getBasePrice();
         categoryId = product.getCategory() != null ? product.getCategory().getId() : null;
+        active = product.getActive();
         stockQuantity = product.getStockQuantity();
 
         if (product.getVariations() != null) {

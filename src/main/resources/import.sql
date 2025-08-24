@@ -12,7 +12,7 @@ INSERT INTO tb_category (id, name, parent_id) VALUES (5, 'Oversized', 1);
 INSERT INTO tb_category (id, name, parent_id) VALUES (6, 'Regata', 1);
 INSERT INTO tb_category (id, name, parent_id) VALUES (7, 'Casual', 1);
 
-INSERT INTO tb_product (name, base_price, description, category_id) VALUES ('Camiseta Polo', 99.90, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit...', 4);
+INSERT INTO tb_product (name, base_price, description, category_id, active) VALUES ('Camiseta Polo', 99.90, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit...', 4, TRUE);
 
 INSERT INTO tb_product_variation (color, size, price_adjustment, discount_amount, stock_quantity, product_id) VALUES ('BRANCO', 'M', 0.00, 10.00, 10, 1);
 INSERT INTO tb_product_variation (color, size, price_adjustment, discount_amount, stock_quantity, product_id) VALUES ('PRETO', 'M', 0.00, 0.00, 20, 1);

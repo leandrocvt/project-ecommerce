@@ -34,6 +34,9 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @Column(name = "active", nullable = false)
+    private Boolean active = true;
+
     @OneToMany(mappedBy = "id.product")
     private Set<OrderItem> items = new HashSet<>();
 
@@ -47,6 +50,10 @@ public class Product {
         return variations.stream()
                 .mapToInt(ProductVariation::getStockQuantity)
                 .sum();
+    }
+
+    public void deactivate() {
+        this.active = false;
     }
 
 }

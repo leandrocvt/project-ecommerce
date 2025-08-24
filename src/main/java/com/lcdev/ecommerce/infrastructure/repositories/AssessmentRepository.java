@@ -14,24 +14,26 @@ import org.springframework.stereotype.Repository;
 public interface AssessmentRepository extends JpaRepository<Assessment, Long> {
 
     @Query("""
-    SELECT 
-        a.id AS id,
-        a.score AS score,
-        a.comment AS comment,
-        a.photoUrl AS photoUrl,
-        CONCAT(u.firstName, ' ', u.lastName) AS username,
-        a.createdAt AS createdAt
-    FROM Assessment a
-    JOIN a.user u
-    WHERE a.product.id = :productId
-    """)
+            SELECT 
+                a.id AS id,
+                a.score AS score,
+                a.comment AS comment,
+                a.photoUrl AS photoUrl,
+                CONCAT(u.firstName, ' ', u.lastName) AS username,
+                a.createdAt AS createdAt
+            FROM Assessment a
+            JOIN a.user u
+            WHERE a.product.id = :productId
+            AND a.product.active = true
+            """)
     Page<AssessmentProjection> findByProductId(@Param("productId") Long productId, Pageable pageable);
 
     @Query("""
-        SELECT AVG(a.score) as averageScore, COUNT(a) as totalReviews
-        FROM Assessment a
-        WHERE a.product.id = :productId
-    """)
+                SELECT AVG(a.score) as averageScore, COUNT(a) as totalReviews
+                FROM Assessment a
+                WHERE a.product.id = :productId
+                AND a.product.active = true
+            """)
     ReviewSummaryProjection findReviewSummaryByProductId(@Param("productId") Long productId);
 
 }

@@ -11,6 +11,7 @@ public interface ProductVariationProjection {
     String getDescription();
     BigDecimal getBasePrice();
     Long getCategoryId();
+    Boolean getActive();
 
     Long getVariationId();
     Color getColor();

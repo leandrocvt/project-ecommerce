@@ -30,6 +30,8 @@ public class ProductRequestDTO {
     @NotNull(message = "Categoria requerida!")
     private Long categoryId;
 
+    private Boolean active;
+
     @NotEmpty(message = "O produto precisa ter pelo menos uma variação!")
     @Size(min = 1, message = "O produto precisa ter pelo menos uma variação!")
     private List<@Valid ProductVariationDTO> variations;

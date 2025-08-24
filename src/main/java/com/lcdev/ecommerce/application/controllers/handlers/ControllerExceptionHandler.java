@@ -3,6 +3,7 @@ package com.lcdev.ecommerce.application.controllers.handlers;
 import com.lcdev.ecommerce.application.dto.CustomError;
 import com.lcdev.ecommerce.application.service.exceptions.BusinessException;
 import com.lcdev.ecommerce.application.service.exceptions.DatabaseException;
+import com.lcdev.ecommerce.application.service.exceptions.InactiveProductException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,13 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<CustomError> business(BusinessException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        CustomError err = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(InactiveProductException.class)
+    public ResponseEntity<CustomError> inactiveProduct(InactiveProductException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.NOT_FOUND;
         CustomError err = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(err);

@@ -2,7 +2,6 @@ package com.lcdev.ecommerce.infrastructure.repositories;
 
 import com.lcdev.ecommerce.domain.entities.Product;
 import com.lcdev.ecommerce.infrastructure.projections.ProductMinProjection;
-import com.lcdev.ecommerce.infrastructure.projections.ProductVariationImageProjection;
 import com.lcdev.ecommerce.infrastructure.projections.ProductVariationProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -64,7 +64,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     ON fv.product_id = p.id AND fv.rn = 1
                 INNER JOIN first_images fi
                     ON fi.variation_id = fv.id AND fi.rn = 1
-                WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
+                WHERE p.active = true
+                    AND (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
                   AND (:categoryId IS NULL OR p.category_id IN (SELECT id FROM category_tree))
             ) sub
             ORDER BY
@@ -104,6 +105,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     p.description AS description,
                     p.basePrice AS basePrice,
                     p.category.id AS categoryId,
+                    p.active as active,
                     v.id AS variationId,
                     v.color AS color,
                     v.size AS size,
@@ -113,8 +115,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                 FROM Product p
                 LEFT JOIN p.variations v
                 WHERE p.id = :productId
+                AND p.active = true
             """)
     List<ProductVariationProjection> findProductWithVariations(@Param("productId") Long productId);
 
-
+    Optional<Product> findByIdAndActiveTrue(Long id);
 }

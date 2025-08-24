@@ -5,6 +5,7 @@ import com.lcdev.ecommerce.application.dto.ProductMinResponseDTO;
 import com.lcdev.ecommerce.application.dto.ProductRequestDTO;
 import com.lcdev.ecommerce.application.dto.ProductResponseDTO;
 import com.lcdev.ecommerce.application.service.exceptions.BusinessException;
+import com.lcdev.ecommerce.application.service.exceptions.InactiveProductException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
 import com.lcdev.ecommerce.domain.entities.Category;
 import com.lcdev.ecommerce.domain.entities.Product;
@@ -93,22 +94,27 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductDetailsResponseDTO findById(Long productId) {
+        Product product = repository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+
+        if (Boolean.FALSE.equals(product.getActive())) {
+            throw new InactiveProductException("Produto está inativo");
+        }
 
         List<ProductVariationProjection> variations = repository.findProductWithVariations(productId);
-        if (variations.isEmpty()) {
-            throw new EntityNotFoundException("Produto não encontrado");
-        }
 
         List<Long> variationIds = variations.stream()
                 .map(ProductVariationProjection::getVariationId)
                 .toList();
-        List<ProductVariationImageProjection> images = imageRepository.findImagesByVariationIds(variationIds);
+
+        List<ProductVariationImageProjection> images = variationIds.isEmpty()
+                ? List.of()
+                : imageRepository.findImagesByVariationIds(variationIds);
 
         ReviewSummaryProjection summary = assessmentRepository.findReviewSummaryByProductId(productId);
 
         List<AssessmentProjection> sample = assessmentRepository.findByProductId(
-                productId, PageRequest.of(0, 3)
-        ).getContent();
+                productId, PageRequest.of(0, 3)).getContent();
 
         return productMapper.toDetailsDTO(variations, images, summary, sample);
     }

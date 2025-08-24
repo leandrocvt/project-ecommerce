@@ -41,6 +41,7 @@ public class ProductMapperImpl implements ProductMapper {
         if (dto.getName() != null) entity.setName(dto.getName());
         if (dto.getDescription() != null) entity.setDescription(dto.getDescription());
         if (dto.getBasePrice() != null) entity.setBasePrice(dto.getBasePrice());
+        if (dto.getActive() != null) entity.setActive(dto.getActive());
     }
 
     @Override
@@ -93,6 +94,7 @@ public class ProductMapperImpl implements ProductMapper {
                 first.getDescription(),
                 first.getBasePrice(),
                 first.getCategoryId(),
+                first.getActive(),
                 0,
                 variations,
                 reviewSummary.getAverageScore(),
