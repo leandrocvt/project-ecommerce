@@ -45,13 +45,15 @@ public class UserService implements UserDetailsService {
     }
 
     public UserResponseDTO save(UserInsertDTO dto){
-        User entity = userMapper.toEntity(dto);
 
-        entity.getRoles().clear();
+        if (Objects.nonNull(repository.findByEmail(dto.getEmail()))) {
+            throw new BadRequestException("Email já cadastrado!");
+        }
+
+        User entity = userMapper.toEntity(dto);
         Role role = roleRepository.findByAuthority("ROLE_CLIENT");
         entity.getRoles().add(role);
 
-        entity.setPassword(dto.getPassword());
         entity.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         entity = repository.save(entity);
@@ -62,6 +64,12 @@ public class UserService implements UserDetailsService {
     public UserResponseDTO findById(Long id) {
         User entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Entity not found! Id:" + id));
+        return userMapper.mapUserResponseDTO(entity);
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponseDTO findProfile(){
+        User entity = authService.authenticated();
         return userMapper.mapUserResponseDTO(entity);
     }
 
@@ -81,8 +89,7 @@ public class UserService implements UserDetailsService {
             throw new BadRequestException("Senha incorreta!");
         }
 
-        User existingUser = repository.findByEmail(dto.getEmail());
-        if (Objects.nonNull(existingUser)) {
+        if (Objects.nonNull(repository.findByEmail(dto.getEmail()))) {
             throw new BadRequestException("Email já cadastrado!");
         }
 
