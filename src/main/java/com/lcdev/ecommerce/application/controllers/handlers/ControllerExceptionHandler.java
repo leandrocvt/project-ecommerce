@@ -60,4 +60,11 @@ public class ControllerExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<CustomError> email(EmailException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        CustomError err = new CustomError(Instant.now(), status.value(), "Email exception", request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
 }
