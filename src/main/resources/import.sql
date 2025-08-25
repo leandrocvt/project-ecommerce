@@ -8,6 +8,7 @@ INSERT INTO tb_role (authority) VALUES ('ROLE_ADMIN');
 INSERT INTO tb_user_role (user_id, role_id) VALUES (1, 1);
 INSERT INTO tb_user_role (user_id, role_id) VALUES (2, 1);
 INSERT INTO tb_user_role (user_id, role_id) VALUES (2, 2);
+INSERT INTO tb_user_role (user_id, role_id) VALUES (3, 1);
 
 INSERT INTO tb_address (road, neighborhood, city, state, zip_code, number, complement, user_id) VALUES ('Av Fernandez', 'Parque Paulista', 'Franco da Rocha', 'SP', '123-4567', '176', 'Próximo ao mercado Don Juan', 1);
 

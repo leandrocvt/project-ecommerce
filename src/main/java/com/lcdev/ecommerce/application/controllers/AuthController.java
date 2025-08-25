@@ -1,14 +1,12 @@
 package com.lcdev.ecommerce.application.controllers;
 
 import com.lcdev.ecommerce.application.dto.EmailDTO;
+import com.lcdev.ecommerce.application.dto.NewPasswordDTO;
 import com.lcdev.ecommerce.application.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,4 +20,11 @@ public class AuthController {
         authService.createRecoverToken(body);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping(value = "/new-password")
+    public ResponseEntity<Void> saveNewPassword(@Valid @RequestBody NewPasswordDTO body){
+        authService.saveNewPassword(body);
+        return ResponseEntity.noContent().build();
+    }
+
 }
