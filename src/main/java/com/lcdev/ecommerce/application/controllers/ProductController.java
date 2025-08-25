@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -23,6 +24,7 @@ public class ProductController {
 
     private final ProductService service;
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<ProductResponseDTO> insert(@Valid @RequestBody ProductRequestDTO dto) {
         ProductResponseDTO newDto = service.save(dto);
@@ -35,12 +37,14 @@ public class ProductController {
         return ResponseEntity.created(uri).body(newDto);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PutMapping(value = "/{id}")
     public ResponseEntity<ProductResponseDTO> update(@Valid @RequestBody ProductRequestDTO dto, @PathVariable Long id){
         ProductResponseDTO newDto = service.update(id, dto);
         return ResponseEntity.ok(newDto);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @GetMapping
     public ResponseEntity<PageResponse<ProductMinResponseDTO>> findAll(
             @RequestParam(required = false) String name,
@@ -68,6 +72,7 @@ public class ProductController {
         return ResponseEntity.ok(PageResponse.from(result));
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @GetMapping(value = "/{id}")
     public ResponseEntity<ProductResponseDTO> findById(@PathVariable Long id){
         ProductResponseDTO dto  = service.findById(id);
