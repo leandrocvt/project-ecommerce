@@ -1,5 +1,5 @@
-INSERT INTO tb_user (first_name, last_name, email, phone, password, birth_date, cpf) VALUES ('Maria', 'Brown', 'maria@gmail.com', '988888888', '$2a$10$71KMqEk340X6pjfU6uY2h.8ly5pR7d6eAp2sY4uP2gRxRJfNM89P.', '2001-07-25', '12345678911');
-INSERT INTO tb_user (first_name, last_name, email, phone, password, birth_date, cpf) VALUES ('Joao', 'Brown', 'joao@gmail.com', '988888888', '$2a$10$71KMqEk340X6pjfU6uY2h.8ly5pR7d6eAp2sY4uP2gRxRJfNM89P.', '2001-07-25', '12345678911');
+INSERT INTO tb_user (first_name, last_name, email, phone, password, birth_date, cpf) VALUES ('Maria', 'Brown', 'maria@gmail.com', '988888888', '$2a$10$swcqxYe2OybmFZ/3dv8f9ujnE8B5QycDXHZkWlzdWOZp0llaRWNYK', '2001-07-25', '12345678911');
+INSERT INTO tb_user (first_name, last_name, email, phone, password, birth_date, cpf) VALUES ('Joao', 'Brown', 'joao@gmail.com', '988888888', '$2a$10$swcqxYe2OybmFZ/3dv8f9ujnE8B5QycDXHZkWlzdWOZp0llaRWNYK', '2001-07-25', '12345678911');
 
 INSERT INTO tb_role (authority) VALUES ('ROLE_CLIENT');
 INSERT INTO tb_role (authority) VALUES ('ROLE_ADMIN');

@@ -1,7 +1,8 @@
 package com.lcdev.ecommerce.infrastructure.mapper.impl;
 
-import com.lcdev.ecommerce.application.dto.UserDTO;
+import com.lcdev.ecommerce.application.dto.RoleDTO;
 import com.lcdev.ecommerce.application.dto.UserInsertDTO;
+import com.lcdev.ecommerce.application.dto.UserResponseDTO;
 import com.lcdev.ecommerce.application.dto.UserUpdateDTO;
 import com.lcdev.ecommerce.domain.entities.User;
 import com.lcdev.ecommerce.infrastructure.mapper.UserMapper;
@@ -13,16 +14,18 @@ import org.springframework.stereotype.Component;
 public class UserMapperImpl implements UserMapper {
 
     @Override
-    public UserDTO mapUserDTO(User user) {
-        return new UserDTO(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getPhone(),
-                user.getBirthDate(),
-                user.getCpf()
-        );
+    public UserResponseDTO mapUserResponseDTO(User user) {
+        UserResponseDTO dto = new UserResponseDTO();
+        dto.setId(user.getId());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setBirthDate(user.getBirthDate());
+        dto.setCpf(user.getCpf());
+        user.getRoles().forEach(role -> dto.getRoles().add(new RoleDTO(role)));
+
+        return dto;
     }
 
     @Override
@@ -42,7 +45,6 @@ public class UserMapperImpl implements UserMapper {
     public User mapUpdate(UserUpdateDTO dto, User entity) {
         entity.setFirstName(dto.firstName());
         entity.setLastName(dto.lastName());
-        entity.setEmail(dto.email());
         entity.setPhone(dto.phone());
         return entity;
     }

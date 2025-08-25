@@ -1,21 +1,22 @@
 package com.lcdev.ecommerce.application.service;
 
-import com.lcdev.ecommerce.application.dto.UserDTO;
 import com.lcdev.ecommerce.application.dto.UserInsertDTO;
+import com.lcdev.ecommerce.application.dto.UserResponseDTO;
 import com.lcdev.ecommerce.application.dto.UserUpdateDTO;
+import com.lcdev.ecommerce.application.dto.UserUpdateEmailDTO;
+import com.lcdev.ecommerce.application.service.exceptions.BadRequestException;
 import com.lcdev.ecommerce.application.service.exceptions.DatabaseException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
 import com.lcdev.ecommerce.domain.entities.Role;
 import com.lcdev.ecommerce.domain.entities.User;
 import com.lcdev.ecommerce.infrastructure.mapper.UserMapper;
 import com.lcdev.ecommerce.infrastructure.projections.UserDetailsProjection;
+import com.lcdev.ecommerce.infrastructure.repositories.RoleRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -33,38 +35,59 @@ public class UserService implements UserDetailsService {
     private final UserRepository repository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+    private final AuthService authService;
 
     @Transactional(readOnly = true)
-    public Page<UserDTO> findAll(String email, Pageable pageable){
+    public Page<UserResponseDTO> findAll(String email, Pageable pageable){
         Page<User> result = repository.searchByEmail(email, pageable);
-        return result.map(userMapper::mapUserDTO);
+        return result.map(userMapper::mapUserResponseDTO);
     }
 
-    public UserDTO save(UserInsertDTO dto){
+    public UserResponseDTO save(UserInsertDTO dto){
         User entity = userMapper.toEntity(dto);
+
+        entity.getRoles().clear();
+        Role role = roleRepository.findByAuthority("ROLE_CLIENT");
+        entity.getRoles().add(role);
+
         entity.setPassword(dto.getPassword());
         entity.setPassword(passwordEncoder.encode(dto.getPassword()));
+
         entity = repository.save(entity);
-        return userMapper.mapUserDTO(entity);
+        return userMapper.mapUserResponseDTO(entity);
     }
 
     @Transactional(readOnly = true)
-    public UserDTO findById(Long id) {
+    public UserResponseDTO findById(Long id) {
         User entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Entity not found! Id:" + id));
-        return userMapper.mapUserDTO(entity);
+        return userMapper.mapUserResponseDTO(entity);
     }
 
     @Transactional
-    public UserDTO update(Long id, UserUpdateDTO dto){
-        try {
-            User entity = repository.getReferenceById(id);
-            entity = userMapper.mapUpdate(dto, entity);
-            entity = repository.save(entity);
-            return userMapper.mapUserDTO(entity);
-        }catch (EntityNotFoundException e){
-            throw new ResourceNotFoundException("Id not found! Id:" + id);
+    public UserResponseDTO update(UserUpdateDTO dto){
+        User entity = authService.authenticated();
+        entity = userMapper.mapUpdate(dto, entity);
+        entity = repository.save(entity);
+        return userMapper.mapUserResponseDTO(entity);
+    }
+
+    @Transactional
+    public void updateEmail(UserUpdateEmailDTO dto) {
+        User user = authService.authenticated();
+
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new BadRequestException("Senha incorreta!");
         }
+
+        User existingUser = repository.findByEmail(dto.getEmail());
+        if (Objects.nonNull(existingUser)) {
+            throw new BadRequestException("Email já cadastrado!");
+        }
+
+        user.setEmail(dto.getEmail());
+        repository.save(user);
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)

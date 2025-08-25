@@ -1,8 +1,9 @@
 package com.lcdev.ecommerce.application.controllers;
 
-import com.lcdev.ecommerce.application.dto.UserDTO;
 import com.lcdev.ecommerce.application.dto.UserInsertDTO;
+import com.lcdev.ecommerce.application.dto.UserResponseDTO;
 import com.lcdev.ecommerce.application.dto.UserUpdateDTO;
+import com.lcdev.ecommerce.application.dto.UserUpdateEmailDTO;
 import com.lcdev.ecommerce.application.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,24 +25,23 @@ public class UserController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping
-    public ResponseEntity<Page<UserDTO>> findAll(
+    public ResponseEntity<Page<UserResponseDTO>> findAll(
             @RequestParam(name = "email", defaultValue = "") String email,
             Pageable pageable){
-        Page<UserDTO> dto = service.findAll(email, pageable);
+        Page<UserResponseDTO> dto = service.findAll(email, pageable);
         return ResponseEntity.ok().body(dto);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @GetMapping(value = "/{id}")
-    public ResponseEntity<UserDTO> findById(@PathVariable Long id){
-        UserDTO dto  = service.findById(id);
+    public ResponseEntity<UserResponseDTO> findById(@PathVariable Long id){
+        UserResponseDTO dto  = service.findById(id);
         return ResponseEntity.ok().body(dto);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @PostMapping
-    public ResponseEntity<UserDTO> insert(@Valid @RequestBody UserInsertDTO dto){
-        UserDTO newDto = service.save(dto);
+    public ResponseEntity<UserResponseDTO> insert(@Valid @RequestBody UserInsertDTO dto){
+        UserResponseDTO newDto = service.save(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(newDto.getId())
@@ -50,10 +50,17 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<UserDTO> update(@Valid @RequestBody UserUpdateDTO dto, @PathVariable Long id){
-        UserDTO newDto = service.update(id, dto);
+    @PutMapping
+    public ResponseEntity<UserResponseDTO> update(@Valid @RequestBody UserUpdateDTO dto){
+        UserResponseDTO newDto = service.update(dto);
         return ResponseEntity.ok(newDto);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
+    @PutMapping("/email")
+    public ResponseEntity<Void> updateEmail(@Valid @RequestBody UserUpdateEmailDTO dto){
+        service.updateEmail(dto);
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")

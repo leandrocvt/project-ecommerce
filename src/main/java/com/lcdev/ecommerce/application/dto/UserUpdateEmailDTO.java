@@ -3,31 +3,17 @@ package com.lcdev.ecommerce.application.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-import java.time.LocalDate;
+@Getter
+public class UserUpdateEmailDTO {
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserInsertDTO {
-
-    @NotBlank(message = "Campo obrigatório!")
-    private String firstName;
-
-    private String lastName;
 
     @Email(message = "Informe um email válido!")
     private String email;
 
-    private String phone;
-    private LocalDate birthDate;
-    private String cpf;
 
     @NotBlank(message = "Campo obrigatório!")
     @Size(min = 8, message = "Deve ter no minímo 8 caracteres")
     private String password;
-
 }

@@ -6,6 +6,5 @@ import lombok.Builder;
 public record UserUpdateDTO(
         String firstName,
         String lastName,
-        String email,
         String phone
 ) {}
