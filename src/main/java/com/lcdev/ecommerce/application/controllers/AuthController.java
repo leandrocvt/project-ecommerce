@@ -1,7 +1,8 @@
 package com.lcdev.ecommerce.application.controllers;
 
-import com.lcdev.ecommerce.application.dto.EmailDTO;
+import com.lcdev.ecommerce.application.dto.EmailMessageDTO;
 import com.lcdev.ecommerce.application.dto.NewPasswordDTO;
+import com.lcdev.ecommerce.application.dto.RecoverTokenRequest;
 import com.lcdev.ecommerce.application.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +17,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping(value = "/recover-token")
-    public ResponseEntity<Void> createRecoverToken(@Valid @RequestBody EmailDTO body){
-        authService.createRecoverToken(body);
+    public ResponseEntity<Void> createRecoverToken(@Valid @RequestBody RecoverTokenRequest body){
+        authService.createRecoverToken(body.getEmail());
         return ResponseEntity.noContent().build();
     }
 

@@ -1,10 +1,11 @@
 package com.lcdev.ecommerce.application.service;
 
-import com.lcdev.ecommerce.application.dto.EmailDTO;
+import com.lcdev.ecommerce.application.dto.EmailMessageDTO;
 import com.lcdev.ecommerce.application.dto.NewPasswordDTO;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
 import com.lcdev.ecommerce.domain.entities.PasswordRecover;
 import com.lcdev.ecommerce.domain.entities.User;
+import com.lcdev.ecommerce.infrastructure.messaging.rabbitmq.EmailProducer;
 import com.lcdev.ecommerce.infrastructure.repositories.PasswordRecoverRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,26 +39,30 @@ public class AuthService {
 
     private final PasswordRecoverRepository passwordRecoverRepository;
 
-    private final EmailService emailService;
+    private final EmailProducer emailProducer;
 
-    public void createRecoverToken(EmailDTO body) {
+    public void createRecoverToken(String email) {
 
-        User user = userRepository.findByEmail(body.getEmail());
-        if (Objects.isNull(user)){
+        User user = userRepository.findByEmail(email);
+        if (Objects.isNull(user)) {
             throw new ResourceNotFoundException("Email não encontrado!");
         }
 
         String token = UUID.randomUUID().toString();
 
         PasswordRecover entity = new PasswordRecover();
-        entity.setEmail(body.getEmail());
+        entity.setEmail(email);
         entity.setToken(token);
         entity.setExpiration(Instant.now().plusSeconds(tokenMinutes * 60L));
         passwordRecoverRepository.save(entity);
 
-        String text = "Acesse o link para definir uma nova senha\n\n" + recoverUri + token + ". Validade de " + tokenMinutes + " minutos";
+        String text = "Acesse o link para definir uma nova senha\n\n"
+                + recoverUri + token
+                + ". Validade de " + tokenMinutes + " minutos";
 
-        emailService.sendEmail(body.getEmail(), "Recuperação de senha", text);
+
+        EmailMessageDTO emailMessage = new EmailMessageDTO(email, "Recuperação de senha", text);
+        emailProducer.sendToQueue(emailMessage);
     }
 
     @Transactional

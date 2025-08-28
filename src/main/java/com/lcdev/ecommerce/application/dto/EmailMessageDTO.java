@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmailDTO {
+public class EmailMessageDTO {
 
-    @NotBlank(message = "Campo obrigatório")
-    @Email(message = "Email inválido")
-    private String email;
+    private String to;
+    private String subject;
+    private String body;
 
 }
