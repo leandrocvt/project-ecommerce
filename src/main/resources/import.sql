@@ -11,6 +11,8 @@ INSERT INTO tb_user_role (user_id, role_id) VALUES (2, 2);
 INSERT INTO tb_user_role (user_id, role_id) VALUES (3, 1);
 
 INSERT INTO tb_address (road, neighborhood, city, state, zip_code, number, complement, user_id) VALUES ('Av Fernandez', 'Parque Paulista', 'Franco da Rocha', 'SP', '123-4567', '176', 'Próximo ao mercado Don Juan', 1);
+INSERT INTO tb_address (road, neighborhood, city, state, zip_code, number, complement, user_id) VALUES ('Rua Luiz Souza', 'Parque Paulista', 'Franco da Rocha', 'SP', '123-4567', '176', 'Próximo ao mercado Don Juan', 2);
+INSERT INTO tb_address (road, neighborhood, city, state, zip_code, number, complement, user_id) VALUES ('Av Pacaembu', 'Parque Paulista', 'Franco da Rocha', 'SP', '123-4567', '176', 'Próximo ao mercado Don Juan', 3);
 
 INSERT INTO tb_category(name, parent_id) VALUES ('Camisetas', NULL);
 INSERT INTO tb_category(name, parent_id) VALUES ('Calças', NULL);

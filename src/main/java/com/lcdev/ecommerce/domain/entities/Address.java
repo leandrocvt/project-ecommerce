@@ -3,8 +3,9 @@ package com.lcdev.ecommerce.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
+
 @Data
-@Builder
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,4 +28,16 @@ public class Address {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Address address = (Address) object;
+        return Objects.equals(id, address.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

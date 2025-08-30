@@ -44,7 +44,6 @@ public class ProductController {
         return ResponseEntity.ok(newDto);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @GetMapping
     public ResponseEntity<PageResponse<ProductMinResponseDTO>> findAll(
             @RequestParam(required = false) String name,
@@ -72,7 +71,6 @@ public class ProductController {
         return ResponseEntity.ok(PageResponse.from(result));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @GetMapping(value = "/{id}")
     public ResponseEntity<ProductResponseDTO> findById(@PathVariable Long id){
         ProductResponseDTO dto  = service.findById(id);

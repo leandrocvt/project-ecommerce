@@ -1,16 +1,17 @@
 package com.lcdev.ecommerce.application.service;
 
-import com.lcdev.ecommerce.application.dto.UserInsertDTO;
-import com.lcdev.ecommerce.application.dto.UserResponseDTO;
-import com.lcdev.ecommerce.application.dto.UserUpdateDTO;
-import com.lcdev.ecommerce.application.dto.UserUpdateEmailDTO;
+import com.lcdev.ecommerce.application.dto.*;
 import com.lcdev.ecommerce.application.service.exceptions.BadRequestException;
 import com.lcdev.ecommerce.application.service.exceptions.DatabaseException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
+import com.lcdev.ecommerce.domain.entities.Address;
 import com.lcdev.ecommerce.domain.entities.Role;
 import com.lcdev.ecommerce.domain.entities.User;
+import com.lcdev.ecommerce.infrastructure.mapper.AddressMapper;
 import com.lcdev.ecommerce.infrastructure.mapper.UserMapper;
 import com.lcdev.ecommerce.infrastructure.projections.UserDetailsProjection;
+import com.lcdev.ecommerce.infrastructure.projections.UserMinProjection;
+import com.lcdev.ecommerce.infrastructure.repositories.AddressRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.RoleRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +37,14 @@ public class UserService implements UserDetailsService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final AddressMapper addressMapper;
+    private final AddressRepository addressRepository;
     private final AuthService authService;
 
     @Transactional(readOnly = true)
-    public Page<UserResponseDTO> findAll(String email, Pageable pageable){
-        Page<User> result = repository.searchByEmail(email, pageable);
-        return result.map(userMapper::mapUserResponseDTO);
+    public Page<UserMinResponseDTO> findAll(String email, Pageable pageable) {
+        Page<UserMinProjection> result = repository.searchByEmailProjection(email, pageable);
+        return result.map(userMapper::mapUserMinResponseDTO);
     }
 
     public UserResponseDTO save(UserInsertDTO dto){
@@ -51,18 +54,23 @@ public class UserService implements UserDetailsService {
         }
 
         User entity = userMapper.toEntity(dto);
+
         Role role = roleRepository.findByAuthority("ROLE_CLIENT");
         entity.getRoles().add(role);
 
         entity.setPassword(passwordEncoder.encode(dto.getPassword()));
 
+        Address address = addressMapper.toEntity(dto.getAddress(), entity);
+        entity.getAddresses().add(address);
+
         entity = repository.save(entity);
+
         return userMapper.mapUserResponseDTO(entity);
     }
 
     @Transactional(readOnly = true)
     public UserResponseDTO findById(Long id) {
-        User entity = repository.findById(id)
+        User entity = repository.findByIdWithAddresses(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Entity not found! Id:" + id));
         return userMapper.mapUserResponseDTO(entity);
     }

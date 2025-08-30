@@ -1,13 +1,11 @@
 package com.lcdev.ecommerce.application.controllers;
 
-import com.lcdev.ecommerce.application.dto.UserInsertDTO;
-import com.lcdev.ecommerce.application.dto.UserResponseDTO;
-import com.lcdev.ecommerce.application.dto.UserUpdateDTO;
-import com.lcdev.ecommerce.application.dto.UserUpdateEmailDTO;
+import com.lcdev.ecommerce.application.dto.*;
 import com.lcdev.ecommerce.application.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,11 +23,16 @@ public class UserController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping
-    public ResponseEntity<Page<UserResponseDTO>> findAll(
+    public ResponseEntity<PageResponse<UserMinResponseDTO>> findAll(
             @RequestParam(name = "email", defaultValue = "") String email,
-            Pageable pageable){
-        Page<UserResponseDTO> dto = service.findAll(email, pageable);
-        return ResponseEntity.ok().body(dto);
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int sizePage){
+
+        Pageable pageable = PageRequest.of(page, sizePage);
+
+        Page<UserMinResponseDTO> result = service.findAll(email, pageable);
+
+        return ResponseEntity.ok(PageResponse.from(result));
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")

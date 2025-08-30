@@ -83,7 +83,9 @@ public class AuthService {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Jwt jwtPrincipal = (Jwt) authentication.getPrincipal();
             String username = jwtPrincipal.getClaim("username");
-            return userRepository.findByEmail(username);
+
+            return userRepository.findByEmailWithAddresses(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("Invalid user"));
         }
         catch (Exception e) {
             throw new UsernameNotFoundException("Invalid user");

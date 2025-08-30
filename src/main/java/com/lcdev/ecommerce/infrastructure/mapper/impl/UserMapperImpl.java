@@ -1,17 +1,18 @@
 package com.lcdev.ecommerce.infrastructure.mapper.impl;
 
-import com.lcdev.ecommerce.application.dto.RoleDTO;
-import com.lcdev.ecommerce.application.dto.UserInsertDTO;
-import com.lcdev.ecommerce.application.dto.UserResponseDTO;
-import com.lcdev.ecommerce.application.dto.UserUpdateDTO;
+import com.lcdev.ecommerce.application.dto.*;
 import com.lcdev.ecommerce.domain.entities.User;
+import com.lcdev.ecommerce.infrastructure.mapper.AddressMapper;
 import com.lcdev.ecommerce.infrastructure.mapper.UserMapper;
+import com.lcdev.ecommerce.infrastructure.projections.UserMinProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class UserMapperImpl implements UserMapper {
+
+    private final AddressMapper addressMapper;
 
     @Override
     public UserResponseDTO mapUserResponseDTO(User user) {
@@ -24,8 +25,18 @@ public class UserMapperImpl implements UserMapper {
         dto.setBirthDate(user.getBirthDate());
         dto.setCpf(user.getCpf());
         user.getRoles().forEach(role -> dto.getRoles().add(new RoleDTO(role)));
-
+        dto.setAddresses(user.getAddresses().stream().map(addressMapper::toDTO).toList());
         return dto;
+    }
+
+    @Override
+    public UserMinResponseDTO mapUserMinResponseDTO(UserMinProjection projection) {
+        return new UserMinResponseDTO(
+                projection.getId(),
+                projection.getFirstName(),
+                projection.getLastName(),
+                projection.getEmail()
+        );
     }
 
     @Override
