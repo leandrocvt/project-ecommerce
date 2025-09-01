@@ -6,14 +6,14 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
-@Data
-@Builder
 @Entity
+@Builder
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Table(name = "tb_order")
 public class Order {
 
@@ -30,7 +30,19 @@ public class Order {
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Payment payment;
 
-    @OneToMany(mappedBy = "id.order")
+    @OneToMany(mappedBy = "id.order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderItem> items = new HashSet<>();
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Order order = (Order) object;
+        return Objects.equals(id, order.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

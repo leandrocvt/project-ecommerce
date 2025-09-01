@@ -1,16 +1,14 @@
 package com.lcdev.ecommerce.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
+import java.util.Objects;
 
-@Data
+
 @Entity
-@EqualsAndHashCode
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PasswordRecover {
@@ -28,4 +26,16 @@ public class PasswordRecover {
     @Column(nullable = false)
     private Instant expiration;
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        PasswordRecover that = (PasswordRecover) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

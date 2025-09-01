@@ -4,14 +4,14 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
-@Data
-@Builder
 @Entity
+@Builder
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Table(name = "tb_category")
 public class Category {
 
@@ -24,4 +24,16 @@ public class Category {
     @OneToMany(mappedBy = "category")
     private Set<Product> products = new HashSet<>();
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Category category = (Category) object;
+        return Objects.equals(id, category.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

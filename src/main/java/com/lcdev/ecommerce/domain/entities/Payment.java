@@ -4,13 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.Objects;
 
-@Data
-@Builder
 @Entity
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Table(name = "tb_payment")
 public class Payment {
 
@@ -22,4 +21,17 @@ public class Payment {
     @OneToOne
     @MapsId
     private Order order;
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Payment payment = (Payment) object;
+        return Objects.equals(id, payment.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

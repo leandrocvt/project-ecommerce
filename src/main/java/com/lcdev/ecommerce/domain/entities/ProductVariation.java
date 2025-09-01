@@ -6,15 +6,14 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-@Data
+
 @Builder
 @Entity
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Table(name = "tb_product_variation")
 public class ProductVariation {
 
@@ -44,6 +43,9 @@ public class ProductVariation {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @OneToMany(mappedBy = "id.variation")
+    private Set<OrderItem> orderItems = new HashSet<>();
+
     public BigDecimal getVariantPrice() {
         BigDecimal adj = priceAdjustment != null ? priceAdjustment : BigDecimal.ZERO;
         return product.getBasePrice().add(adj);
@@ -64,4 +66,16 @@ public class ProductVariation {
         return disc.multiply(new BigDecimal("100")).divide(base, 2, java.math.RoundingMode.HALF_UP);
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        ProductVariation that = (ProductVariation) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

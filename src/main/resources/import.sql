@@ -40,7 +40,7 @@ INSERT INTO tb_product_variation_images (variation_id, img_url, is_primary) VALU
 
 INSERT INTO tb_order (moment, status, client_id) VALUES (TIMESTAMP WITH TIME ZONE '2022-07-25T13:00:00Z', 1, 1);
 
-INSERT INTO tb_order_item (order_id, product_id, quantity, price) VALUES (1, 1, 2, 99.90);
+INSERT INTO tb_order_item (order_id, variation_id, quantity, price) VALUES (1, 1, 2, 99.90);
 
 INSERT INTO tb_payment (order_id, moment) VALUES (1, TIMESTAMP WITH TIME ZONE '2022-07-25T15:00:00Z');
 

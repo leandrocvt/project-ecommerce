@@ -6,9 +6,9 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.*;
 
-@Data
-@Builder
 @Entity
+@Builder
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tb_product")
@@ -37,9 +37,6 @@ public class Product {
     @Column(name = "active", nullable = false)
     private Boolean active = true;
 
-    @OneToMany(mappedBy = "id.product")
-    private Set<OrderItem> items = new HashSet<>();
-
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductVariation> variations = new ArrayList<>();
 
@@ -56,4 +53,16 @@ public class Product {
         this.active = false;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Product product = (Product) object;
+        return Objects.equals(id, product.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

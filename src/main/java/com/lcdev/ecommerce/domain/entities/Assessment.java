@@ -1,14 +1,13 @@
 package com.lcdev.ecommerce.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-@Data
 @Entity
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tb_assessment", uniqueConstraints = {
@@ -35,5 +34,18 @@ public class Assessment {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_id", nullable = false)
 	private Product product;
+
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) return true;
+		if (object == null || getClass() != object.getClass()) return false;
+		Assessment that = (Assessment) object;
+		return Objects.equals(id, that.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
 
 }

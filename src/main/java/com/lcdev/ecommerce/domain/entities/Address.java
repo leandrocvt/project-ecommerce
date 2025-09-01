@@ -5,11 +5,11 @@ import lombok.*;
 
 import java.util.Objects;
 
-@Data
+
 @Entity
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Table(name = "tb_address")
 public class Address {
 
