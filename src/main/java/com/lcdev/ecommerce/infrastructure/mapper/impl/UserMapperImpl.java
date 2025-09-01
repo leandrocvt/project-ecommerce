@@ -8,6 +8,8 @@ import com.lcdev.ecommerce.infrastructure.projections.UserMinProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Component
 @RequiredArgsConstructor
 public class UserMapperImpl implements UserMapper {
@@ -54,9 +56,9 @@ public class UserMapperImpl implements UserMapper {
 
     @Override
     public User mapUpdate(UserUpdateDTO dto, User entity) {
-        entity.setFirstName(dto.firstName());
-        entity.setLastName(dto.lastName());
-        entity.setPhone(dto.phone());
+        if (Objects.nonNull(dto.firstName())) entity.setFirstName(dto.firstName());
+        if (Objects.nonNull(dto.lastName())) entity.setLastName(dto.lastName());
+        if (Objects.nonNull(dto.phone())) entity.setPhone(dto.phone());
         return entity;
     }
 

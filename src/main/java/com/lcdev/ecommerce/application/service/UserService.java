@@ -105,6 +105,19 @@ public class UserService implements UserDetailsService {
         repository.save(user);
     }
 
+    @Transactional
+    public void updatePassword(UserUpdatePasswordDTO dto) {
+        User user = authService.authenticated();
+
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new BadRequestException("Senha incorreta!");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        repository.save(user);
+    }
+
+
     @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id) {
         if (!repository.existsById(id)) {
