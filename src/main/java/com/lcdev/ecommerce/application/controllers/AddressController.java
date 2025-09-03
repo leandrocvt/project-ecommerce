@@ -1,8 +1,6 @@
 package com.lcdev.ecommerce.application.controllers;
 
-import com.lcdev.ecommerce.application.dto.AddressDTO;
-import com.lcdev.ecommerce.application.dto.UserInsertDTO;
-import com.lcdev.ecommerce.application.dto.UserResponseDTO;
+import com.lcdev.ecommerce.application.dto.address.AddressDTO;
 import com.lcdev.ecommerce.application.service.AddressService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

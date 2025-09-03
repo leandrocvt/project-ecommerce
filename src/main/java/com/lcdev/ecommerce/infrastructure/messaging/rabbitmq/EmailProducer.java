@@ -1,6 +1,6 @@
 package com.lcdev.ecommerce.infrastructure.messaging.rabbitmq;
 
-import com.lcdev.ecommerce.application.dto.EmailMessageDTO;
+import com.lcdev.ecommerce.application.dto.message.EmailMessageDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;

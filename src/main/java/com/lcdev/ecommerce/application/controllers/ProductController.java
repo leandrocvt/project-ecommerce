@@ -1,6 +1,9 @@
 package com.lcdev.ecommerce.application.controllers;
 
 import com.lcdev.ecommerce.application.dto.*;
+import com.lcdev.ecommerce.application.dto.product.ProductMinResponseDTO;
+import com.lcdev.ecommerce.application.dto.product.ProductRequestDTO;
+import com.lcdev.ecommerce.application.dto.product.ProductResponseDTO;
 import com.lcdev.ecommerce.application.service.ProductService;
 import com.lcdev.ecommerce.domain.enums.Size;
 import jakarta.validation.Valid;

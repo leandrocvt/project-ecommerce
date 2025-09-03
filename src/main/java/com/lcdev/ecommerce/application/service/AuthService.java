@@ -1,7 +1,7 @@
 package com.lcdev.ecommerce.application.service;
 
-import com.lcdev.ecommerce.application.dto.EmailMessageDTO;
-import com.lcdev.ecommerce.application.dto.NewPasswordDTO;
+import com.lcdev.ecommerce.application.dto.message.EmailMessageDTO;
+import com.lcdev.ecommerce.application.dto.auth.NewPasswordDTO;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
 import com.lcdev.ecommerce.domain.entities.PasswordRecover;
 import com.lcdev.ecommerce.domain.entities.User;

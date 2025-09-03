@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -41,6 +43,40 @@ public class Order {
     @Column(name = "discount_applied", precision = 19, scale = 2)
     private BigDecimal discountApplied;
 
+    private String shippingMethod;
+    private BigDecimal shippingCost;
+    private LocalDate shippingDeadline;
+
+    public BigDecimal getSubtotal() {
+        return items.stream()
+                .map(OrderItem::getSubTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public BigDecimal getTotal() {
+        BigDecimal subtotal = getSubtotal();
+        BigDecimal shipping = shippingCost != null ? shippingCost : BigDecimal.ZERO;
+        BigDecimal discount = discountApplied != null ? discountApplied : BigDecimal.ZERO;
+
+        return subtotal
+                .subtract(discount)
+                .add(shipping)
+                .max(BigDecimal.ZERO) // nunca negativo
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public void applyCoupon(Coupon coupon) {
+        BigDecimal subtotal = getSubtotal();
+        BigDecimal discount = coupon.calculateDiscount(subtotal)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        this.coupon = coupon;
+        this.discountApplied = discount;
+
+        coupon.incrementUsage();
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) return true;
@@ -53,4 +89,6 @@ public class Order {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+
 }

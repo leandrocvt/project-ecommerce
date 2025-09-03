@@ -1,10 +1,13 @@
 package com.lcdev.ecommerce.application.service;
 
-import com.lcdev.ecommerce.application.dto.CreateOrderRequest;
-import com.lcdev.ecommerce.application.dto.OrderDTO;
-import com.lcdev.ecommerce.application.dto.OrderItemRequest;
+import com.lcdev.ecommerce.application.dto.order.CreateOrderRequest;
+import com.lcdev.ecommerce.application.dto.order.OrderDTO;
+import com.lcdev.ecommerce.application.dto.order.OrderItemRequest;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
-import com.lcdev.ecommerce.domain.entities.*;
+import com.lcdev.ecommerce.domain.entities.Coupon;
+import com.lcdev.ecommerce.domain.entities.Order;
+import com.lcdev.ecommerce.domain.entities.ProductVariation;
+import com.lcdev.ecommerce.domain.entities.User;
 import com.lcdev.ecommerce.infrastructure.mapper.impl.OrderMapperImpl;
 import com.lcdev.ecommerce.infrastructure.projections.ProductVariationImageProjection;
 import com.lcdev.ecommerce.infrastructure.repositories.CouponRepository;
@@ -15,8 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,47 +32,54 @@ public class OrderService {
     private final ProductVariationRepository variationRepository;
     private final CouponRepository couponRepository;
     private final OrderMapperImpl orderMapper;
+    private final OrderFactory orderFactory;
     private final AuthService authService;
-
 
     @Transactional
     public OrderDTO insert(CreateOrderRequest request) {
         User user = authService.authenticated();
 
+        List<ProductVariation> variations = fetchVariations(request);
+
+        Order order = orderFactory.createOrder(request, user, variations);
+
+        applyCouponIfPresent(order, request.couponCode());
+
+        repository.save(order);
+
+        Map<Long, String> primaryImages = fetchPrimaryImages(variations);
+
+        return orderMapper.toDTO(order, primaryImages);
+    }
+
+    private List<ProductVariation> fetchVariations(CreateOrderRequest request) {
         List<Long> variationIds = request.items().stream()
                 .map(OrderItemRequest::variationId)
                 .toList();
 
-        List<ProductVariation> variations = variationRepository
-                .findAllWithProductAndCategoryByIds(variationIds);
+        return variationRepository.findAllWithProductAndCategoryByIds(variationIds);
+    }
 
-        Order order = orderMapper.toEntity(request, user, variations);
-
-        BigDecimal subtotal = order.getItems().stream()
-                .map(OrderItem::getSubTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        if (Objects.nonNull(request.couponCode())) {
-            Coupon coupon = couponRepository.findByCode(request.couponCode())
+    private void applyCouponIfPresent(Order order, String couponCode) {
+        if (Objects.nonNull(couponCode)) {
+            Coupon coupon = couponRepository.findByCode(couponCode)
                     .orElseThrow(() -> new ResourceNotFoundException("Cupom não encontrado"));
-
-            BigDecimal discount = coupon.calculateDiscount(subtotal).setScale(2, RoundingMode.HALF_UP);
-            order.setCoupon(coupon);
-            order.setDiscountApplied(discount);
-            coupon.incrementUsage();
+            order.applyCoupon(coupon);
         }
+    }
 
-        repository.save(order);
+    private Map<Long, String> fetchPrimaryImages(List<ProductVariation> variations) {
+        List<Long> variationIds = variations.stream()
+                .map(ProductVariation::getId)
+                .toList();
 
-        Map<Long, String> primaryImages = imageRepository.findImagesByVariationIds(variationIds)
+        return imageRepository.findImagesByVariationIds(variationIds)
                 .stream()
                 .filter(p -> Boolean.TRUE.equals(p.getPrimary()))
                 .collect(Collectors.toMap(
                         ProductVariationImageProjection::getVariationId,
                         ProductVariationImageProjection::getImgUrl
                 ));
-
-        return orderMapper.toDTO(order, primaryImages);
     }
 
 }

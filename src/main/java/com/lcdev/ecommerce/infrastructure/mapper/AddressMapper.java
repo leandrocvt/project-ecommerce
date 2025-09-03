@@ -1,9 +1,6 @@
 package com.lcdev.ecommerce.infrastructure.mapper;
 
-import com.lcdev.ecommerce.application.dto.AddressDTO;
-import com.lcdev.ecommerce.application.dto.UserInsertDTO;
-import com.lcdev.ecommerce.application.dto.UserResponseDTO;
-import com.lcdev.ecommerce.application.dto.UserUpdateDTO;
+import com.lcdev.ecommerce.application.dto.address.AddressDTO;
 import com.lcdev.ecommerce.domain.entities.Address;
 import com.lcdev.ecommerce.domain.entities.User;
 

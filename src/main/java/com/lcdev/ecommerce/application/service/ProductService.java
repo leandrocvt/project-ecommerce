@@ -1,9 +1,9 @@
 package com.lcdev.ecommerce.application.service;
 
-import com.lcdev.ecommerce.application.dto.ProductDetailsResponseDTO;
-import com.lcdev.ecommerce.application.dto.ProductMinResponseDTO;
-import com.lcdev.ecommerce.application.dto.ProductRequestDTO;
-import com.lcdev.ecommerce.application.dto.ProductResponseDTO;
+import com.lcdev.ecommerce.application.dto.product.ProductDetailsResponseDTO;
+import com.lcdev.ecommerce.application.dto.product.ProductMinResponseDTO;
+import com.lcdev.ecommerce.application.dto.product.ProductRequestDTO;
+import com.lcdev.ecommerce.application.dto.product.ProductResponseDTO;
 import com.lcdev.ecommerce.application.service.exceptions.BusinessException;
 import com.lcdev.ecommerce.application.service.exceptions.InactiveProductException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;

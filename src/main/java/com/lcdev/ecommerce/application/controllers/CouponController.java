@@ -1,8 +1,8 @@
 package com.lcdev.ecommerce.application.controllers;
 
-import com.lcdev.ecommerce.application.dto.CouponRequestDTO;
-import com.lcdev.ecommerce.application.dto.CouponResponseDTO;
-import com.lcdev.ecommerce.application.dto.CouponValidationResponseDTO;
+import com.lcdev.ecommerce.application.dto.coupon.CouponRequestDTO;
+import com.lcdev.ecommerce.application.dto.coupon.CouponResponseDTO;
+import com.lcdev.ecommerce.application.dto.coupon.CouponValidationResponseDTO;
 import com.lcdev.ecommerce.application.dto.PageResponse;
 import com.lcdev.ecommerce.application.service.CouponService;
 import jakarta.validation.Valid;

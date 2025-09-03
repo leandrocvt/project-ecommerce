@@ -1,6 +1,6 @@
 package com.lcdev.ecommerce.infrastructure.mapper.impl;
 
-import com.lcdev.ecommerce.application.dto.ProductRequestDTO;
+import com.lcdev.ecommerce.application.dto.product.ProductRequestDTO;
 import com.lcdev.ecommerce.domain.entities.Product;
 import com.lcdev.ecommerce.domain.entities.ProductVariation;
 import com.lcdev.ecommerce.domain.entities.ProductVariationImage;

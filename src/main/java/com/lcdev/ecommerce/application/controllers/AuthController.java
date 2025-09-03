@@ -1,8 +1,7 @@
 package com.lcdev.ecommerce.application.controllers;
 
-import com.lcdev.ecommerce.application.dto.EmailMessageDTO;
-import com.lcdev.ecommerce.application.dto.NewPasswordDTO;
-import com.lcdev.ecommerce.application.dto.RecoverTokenRequest;
+import com.lcdev.ecommerce.application.dto.auth.NewPasswordDTO;
+import com.lcdev.ecommerce.application.dto.auth.RecoverTokenRequest;
 import com.lcdev.ecommerce.application.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

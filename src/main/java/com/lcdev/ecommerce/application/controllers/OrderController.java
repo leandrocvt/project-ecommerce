@@ -1,7 +1,7 @@
 package com.lcdev.ecommerce.application.controllers;
 
-import com.lcdev.ecommerce.application.dto.CreateOrderRequest;
-import com.lcdev.ecommerce.application.dto.OrderDTO;
+import com.lcdev.ecommerce.application.dto.order.CreateOrderRequest;
+import com.lcdev.ecommerce.application.dto.order.OrderDTO;
 import com.lcdev.ecommerce.application.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

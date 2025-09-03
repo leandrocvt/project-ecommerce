@@ -1,7 +1,7 @@
 package com.lcdev.ecommerce.infrastructure.mapper.impl;
 
-import com.lcdev.ecommerce.application.dto.CouponRequestDTO;
-import com.lcdev.ecommerce.application.dto.CouponResponseDTO;
+import com.lcdev.ecommerce.application.dto.coupon.CouponRequestDTO;
+import com.lcdev.ecommerce.application.dto.coupon.CouponResponseDTO;
 import com.lcdev.ecommerce.domain.entities.Coupon;
 import com.lcdev.ecommerce.domain.enums.CouponStatus;
 import com.lcdev.ecommerce.infrastructure.mapper.CouponMapper;

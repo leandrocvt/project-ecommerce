@@ -1,6 +1,7 @@
 package com.lcdev.ecommerce.application.controllers;
 
 import com.lcdev.ecommerce.application.dto.*;
+import com.lcdev.ecommerce.application.dto.user.*;
 import com.lcdev.ecommerce.application.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

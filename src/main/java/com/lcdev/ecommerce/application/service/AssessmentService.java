@@ -1,6 +1,6 @@
 package com.lcdev.ecommerce.application.service;
 
-import com.lcdev.ecommerce.application.dto.AssessmentResponseDTO;
+import com.lcdev.ecommerce.application.dto.assessment.AssessmentResponseDTO;
 import com.lcdev.ecommerce.infrastructure.repositories.AssessmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

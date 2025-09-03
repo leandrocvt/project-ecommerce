@@ -1,10 +1,8 @@
 package com.lcdev.ecommerce.application.controllers;
 
 import com.lcdev.ecommerce.application.dto.*;
+import com.lcdev.ecommerce.application.dto.assessment.AssessmentResponseDTO;
 import com.lcdev.ecommerce.application.service.AssessmentService;
-import com.lcdev.ecommerce.application.service.ProductService;
-import com.lcdev.ecommerce.domain.enums.Size;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,10 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.math.BigDecimal;
-import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor

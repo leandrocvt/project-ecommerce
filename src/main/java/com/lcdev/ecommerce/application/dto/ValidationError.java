@@ -1,5 +1,7 @@
 package com.lcdev.ecommerce.application.dto;
 
+import com.lcdev.ecommerce.application.dto.message.FieldMessage;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;

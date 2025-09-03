@@ -1,6 +1,7 @@
 package com.lcdev.ecommerce.infrastructure.mapper.impl;
 
-import com.lcdev.ecommerce.application.dto.*;
+import com.lcdev.ecommerce.application.dto.assessment.AssessmentResponseDTO;
+import com.lcdev.ecommerce.application.dto.product.*;
 import com.lcdev.ecommerce.domain.entities.Category;
 import com.lcdev.ecommerce.domain.entities.Product;
 import com.lcdev.ecommerce.infrastructure.mapper.ProductMapper;

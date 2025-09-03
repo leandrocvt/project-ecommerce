@@ -1,6 +1,6 @@
 package com.lcdev.ecommerce.application.service;
 
-import com.lcdev.ecommerce.application.dto.*;
+import com.lcdev.ecommerce.application.dto.user.*;
 import com.lcdev.ecommerce.application.service.exceptions.BadRequestException;
 import com.lcdev.ecommerce.application.service.exceptions.DatabaseException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
