@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,9 @@ public class OrderDTO {
     @NotEmpty(message = "Deve ter pelo menos um item.")
     private List<OrderItemDTO> items = new ArrayList<>();
     private BigDecimal total;
+
+    private String couponCode;
+    private BigDecimal discountApplied;
 
     public OrderDTO(Long id, Instant moment, OrderStatus status, ClientDTO client, PaymentDTO payment) {
         this.id = id;
@@ -57,10 +61,6 @@ public class OrderDTO {
     public OrderDTO(Order entity, List<OrderItemDTO> itemDTOs) {
         this(entity);
         this.items = itemDTOs;
-
-        this.total = items.stream()
-                .map(OrderItemDTO::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
 }

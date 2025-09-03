@@ -16,6 +16,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
@@ -29,7 +31,7 @@ public class OrderMapperImpl implements OrderMapper {
     private final ProductVariationRepository variationRepository;
 
     @Override
-    public Order toEntity(OrderDTO dto, User user, List<ProductVariation> variations) {
+    public Order toEntity(CreateOrderRequest request, User user, List<ProductVariation> variations) {
         Order order = new Order();
         order.setMoment(Instant.now());
         order.setStatus(OrderStatus.WAITING_PAYMENT);
@@ -38,12 +40,12 @@ public class OrderMapperImpl implements OrderMapper {
         Map<Long, ProductVariation> variationMap = variations.stream()
                 .collect(Collectors.toMap(ProductVariation::getId, Function.identity()));
 
-        Set<OrderItem> items = dto.getItems().stream()
-                .map(itemDTO -> {
-                    ProductVariation variation = variationMap.get(itemDTO.getVariationId());
+        Set<OrderItem> items = request.items().stream()
+                .map(itemRequest -> {
+                    ProductVariation variation = variationMap.get(itemRequest.variationId());
                     if (Objects.isNull(variation)) {
                         throw new ResourceNotFoundException(
-                                "Variação de produto não encontrada: " + itemDTO.getVariationId()
+                                "Variação de produto não encontrada: " + itemRequest.variationId()
                         );
                     }
                     if (Boolean.FALSE.equals(variation.getProduct().getActive())) {
@@ -51,7 +53,7 @@ public class OrderMapperImpl implements OrderMapper {
                                 "Produto inativo: " + variation.getProduct().getId()
                         );
                     }
-                    return new OrderItem(order, variation, itemDTO.getQuantity(), variation.getFinalPrice());
+                    return new OrderItem(order, variation, itemRequest.quantity(), variation.getFinalPrice());
                 })
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -68,7 +70,26 @@ public class OrderMapperImpl implements OrderMapper {
                 })
                 .toList();
 
-        return new OrderDTO(order, itemDTOs);
+        OrderDTO dto = new OrderDTO(order, itemDTOs);
+
+        BigDecimal subtotal = itemDTOs.stream()
+                .map(OrderItemDTO::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        if (order.getCoupon() != null && order.getDiscountApplied() != null) {
+            BigDecimal discount = order.getDiscountApplied().setScale(2, RoundingMode.HALF_UP);
+            dto.setCouponCode(order.getCoupon().getCode());
+            dto.setDiscountApplied(discount);
+
+            BigDecimal finalTotal = subtotal.subtract(discount).max(BigDecimal.ZERO)
+                    .setScale(2, RoundingMode.HALF_UP);
+            dto.setTotal(finalTotal);
+        } else {
+            dto.setTotal(subtotal);
+        }
+
+        return dto;
     }
 
 }

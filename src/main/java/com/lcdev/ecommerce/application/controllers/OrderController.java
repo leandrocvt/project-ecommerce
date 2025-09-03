@@ -1,5 +1,6 @@
 package com.lcdev.ecommerce.application.controllers;
 
+import com.lcdev.ecommerce.application.dto.CreateOrderRequest;
 import com.lcdev.ecommerce.application.dto.OrderDTO;
 import com.lcdev.ecommerce.application.service.OrderService;
 import jakarta.validation.Valid;
@@ -21,12 +22,13 @@ public class OrderController {
     private final OrderService service;
 
     @PostMapping
-    public ResponseEntity<OrderDTO> insert(@Valid @RequestBody OrderDTO dto){
-        dto = service.insert(dto);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(dto.getId()).toUri();
+    public ResponseEntity<OrderDTO> insert(@Valid @RequestBody CreateOrderRequest request) {
+        OrderDTO dto = service.insert(request);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(dto.getId())
+                .toUri();
         return ResponseEntity.created(uri).body(dto);
     }
-
 
 }

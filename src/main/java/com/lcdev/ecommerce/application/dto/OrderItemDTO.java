@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,8 @@ public class OrderItemDTO {
         this.productName = entity.getVariation().getProduct().getName();
         this.price = entity.getVariation().getFinalPrice();
         this.quantity = entity.getQuantity();
-        this.subtotal = price.multiply(BigDecimal.valueOf(quantity));
+        this.subtotal = this.price.multiply(BigDecimal.valueOf(this.quantity))
+                .setScale(2, RoundingMode.HALF_UP);
         this.imageUrl = imageUrl;
     }
 
