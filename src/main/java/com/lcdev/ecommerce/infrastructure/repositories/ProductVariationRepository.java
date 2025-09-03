@@ -16,12 +16,12 @@ public interface ProductVariationRepository extends JpaRepository<ProductVariati
     Optional<ProductVariation> findByIdOnly(@Param("id") Long id);
 
     @Query("""
-    SELECT v
-    FROM ProductVariation v
-    JOIN FETCH v.product p
-    JOIN FETCH p.category c
-    WHERE v.id IN :ids
-""")
+                SELECT v
+                FROM ProductVariation v
+                JOIN FETCH v.product p
+                JOIN FETCH p.category c
+                WHERE v.id IN :ids
+            """)
     List<ProductVariation> findAllWithProductAndCategoryByIds(@Param("ids") List<Long> ids);
 
 }

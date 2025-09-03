@@ -4,6 +4,7 @@ import com.lcdev.ecommerce.domain.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Objects;
@@ -32,6 +33,13 @@ public class Order {
 
     @OneToMany(mappedBy = "id.order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderItem> items = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "coupon_id")
+    private Coupon coupon;
+
+    @Column(name = "discount_applied", precision = 19, scale = 2)
+    private BigDecimal discountApplied;
 
     @Override
     public boolean equals(Object object) {
