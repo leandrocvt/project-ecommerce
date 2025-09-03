@@ -7,6 +7,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -38,14 +40,17 @@ public class Coupon {
 
     private BigDecimal minPurchaseAmount;
 
+    @OneToMany(mappedBy = "coupon")
+    private List<Order> orders = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     private CouponStatus status;
 
     public boolean isValid(BigDecimal orderTotal) {
         return CouponStatus.ACTIVE.equals(this.status)
-                && (this.validUntil == null || !this.validUntil.isBefore(LocalDate.now()))
-                && (this.minPurchaseAmount == null || orderTotal.compareTo(this.minPurchaseAmount) >= 0)
-                && (this.maxUses == null || this.currentUses < this.maxUses);
+                && (Objects.isNull(this.validUntil) || !this.validUntil.isBefore(LocalDate.now()))
+                && (Objects.isNull(this.minPurchaseAmount) || orderTotal.compareTo(this.minPurchaseAmount) >= 0)
+                && (Objects.isNull(this.maxUses) || this.currentUses < this.maxUses);
     }
 
     public BigDecimal calculateDiscount(BigDecimal orderTotal) {

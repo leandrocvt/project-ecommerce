@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +51,7 @@ public class OrderService {
                 .map(OrderItem::getSubTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if (request.couponCode() != null) {
+        if (Objects.nonNull(request.couponCode())) {
             Coupon coupon = couponRepository.findByCode(request.couponCode())
                     .orElseThrow(() -> new ResourceNotFoundException("Cupom não encontrado"));
 

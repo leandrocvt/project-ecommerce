@@ -67,11 +67,12 @@ public class CouponController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<PageResponse<CouponResponseDTO>> findAll(
+            @RequestParam(required = false) String code,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int sizePage
     ) {
         Pageable pageable = PageRequest.of(page, sizePage);
-        Page<CouponResponseDTO> result = service.findAll(pageable);
+        Page<CouponResponseDTO> result = service.findAll(code, pageable);
         return ResponseEntity.ok(PageResponse.from(result));
     }
 

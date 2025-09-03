@@ -54,8 +54,9 @@ public class CouponService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CouponResponseDTO> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<CouponResponseDTO> findAll(String code, Pageable pageable) {
+        return repository.search(code, pageable)
+                .map(mapper::toResponse);
     }
 
     @Transactional
