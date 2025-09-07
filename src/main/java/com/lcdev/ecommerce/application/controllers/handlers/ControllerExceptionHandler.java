@@ -3,7 +3,10 @@ package com.lcdev.ecommerce.application.controllers.handlers;
 import com.lcdev.ecommerce.application.dto.CustomError;
 import com.lcdev.ecommerce.application.dto.ValidationError;
 import com.lcdev.ecommerce.application.service.exceptions.*;
+import com.lcdev.ecommerce.infrastructure.payment.mercadopago.exceptions.MercadoPagoException;
+import com.lcdev.ecommerce.infrastructure.payment.mercadopago.exceptions.PaymentException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -64,6 +67,42 @@ public class ControllerExceptionHandler {
     public ResponseEntity<CustomError> email(EmailException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         CustomError err = new CustomError(Instant.now(), status.value(), "Email exception", request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(MercadoPagoException.class)
+    public ResponseEntity<CustomError> mercadoPago(MercadoPagoException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_GATEWAY; // erro externo
+        CustomError err = new CustomError(
+                Instant.now(),
+                status.value(),
+                e.getMessage() + " - detalhes: " + e.getDetails(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<CustomError> payment(PaymentException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        CustomError err = new CustomError(
+                Instant.now(),
+                status.value(),
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler({DuplicateKeyException.class, org.hibernate.NonUniqueObjectException.class})
+    public ResponseEntity<CustomError> duplicateKey(Exception e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        CustomError err = new CustomError(
+                Instant.now(),
+                status.value(),
+                "Conflito de persistência: " + e.getMessage(),
+                request.getRequestURI()
+        );
         return ResponseEntity.status(status).body(err);
     }
 

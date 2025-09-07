@@ -62,7 +62,7 @@ public class Order {
         return subtotal
                 .subtract(discount)
                 .add(shipping)
-                .max(BigDecimal.ZERO) // nunca negativo
+                .max(BigDecimal.ZERO)
                 .setScale(2, RoundingMode.HALF_UP);
     }
 

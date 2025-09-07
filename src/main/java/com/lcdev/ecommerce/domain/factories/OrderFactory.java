@@ -1,4 +1,4 @@
-package com.lcdev.ecommerce.application.service;
+package com.lcdev.ecommerce.domain.factories;
 
 import com.lcdev.ecommerce.application.dto.order.CreateOrderRequest;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;

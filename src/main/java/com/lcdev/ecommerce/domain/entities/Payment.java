@@ -1,5 +1,6 @@
 package com.lcdev.ecommerce.domain.entities;
 
+import com.lcdev.ecommerce.domain.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,17 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Instant moment;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
+
+    private String transactionId;
+
+    private String gateway;
+
+    private String paymentMethod;
+
+    private String cardBrand;
 
     @OneToOne
     @MapsId

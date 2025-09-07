@@ -19,6 +19,13 @@ public record CreateOrderRequest(
         BigDecimal shippingCost,
         @NotNull(message = "Prazo de entrega é obrigatório!")
         @FutureOrPresent(message = "O prazo de entrega deve ser hoje ou uma data futura")
-        LocalDate shippingDeadline
+        LocalDate shippingDeadline,
+        @NotBlank
+        String paymentMethod,
+        String cardBrand,
+        String token,
+        Integer installments,
+        String payerIdentificationNumber,
+        String payerIdentificationType
 ) {
 }
