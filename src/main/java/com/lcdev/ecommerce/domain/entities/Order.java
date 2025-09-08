@@ -23,7 +23,11 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant moment;
+
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
     @ManyToOne
@@ -32,6 +36,9 @@ public class Order {
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Payment payment;
+
+    @Column(name = "expiration_moment", columnDefinition = "TIMESTAMP WITHOUT TIME ZONE", nullable = true)
+    private Instant expirationMoment;
 
     @OneToMany(mappedBy = "id.order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderItem> items = new HashSet<>();

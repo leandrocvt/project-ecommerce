@@ -94,7 +94,7 @@ public class MercadoPagoClient {
     private PaymentPayerRequest buildPayer(PaymentRequest request) {
         return PaymentPayerRequest.builder()
                 .email(request.payerEmail())
-                .firstName("Cliente") // pode vir do User futuramente
+                .firstName("Cliente")
                 .identification(
                         IdentificationRequest.builder()
                                 .type(request.payerIdentificationType())

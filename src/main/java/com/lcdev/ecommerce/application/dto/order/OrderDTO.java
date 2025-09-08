@@ -33,6 +33,7 @@ public class OrderDTO {
     private String shippingMethod;
     private BigDecimal shippingCost;
     private LocalDate shippingDeadline;
+    private String pixQrCode;
 
     public OrderDTO(Order entity, List<OrderItemDTO> itemDTOs) {
         this.id = entity.getId();

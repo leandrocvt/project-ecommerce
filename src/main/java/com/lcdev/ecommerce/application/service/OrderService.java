@@ -11,6 +11,7 @@ import com.lcdev.ecommerce.domain.entities.Coupon;
 import com.lcdev.ecommerce.domain.entities.Order;
 import com.lcdev.ecommerce.domain.entities.ProductVariation;
 import com.lcdev.ecommerce.domain.entities.User;
+import com.lcdev.ecommerce.domain.enums.OrderStatus;
 import com.lcdev.ecommerce.domain.enums.PaymentStatus;
 import com.lcdev.ecommerce.domain.factories.OrderFactory;
 import com.lcdev.ecommerce.infrastructure.mapper.impl.OrderMapperImpl;
@@ -53,32 +54,50 @@ public class OrderService {
 
     private OrderDTO createOrderWithPix(CreateOrderRequest request) {
         User user = authService.authenticated();
-        List<ProductVariation> variations = fetchVariations(request);
+        validateUserPendingOrders(user);
 
+        List<ProductVariation> variations = fetchVariations(request);
         Order order = orderFactory.createOrder(request, user, variations);
         applyCouponIfPresent(order, request.couponCode());
 
         repository.save(order);
 
+        PaymentResponse paymentResponse = paymentService.processPaymentForOrder(
+                new PaymentRequest(
+                        order.getTotal(),
+                        "BRL",
+                        request.paymentMethod(),
+                        null,
+                        null,
+                        null,
+                        user.getEmail(),
+                        request.payerIdentificationType(),
+                        request.payerIdentificationNumber()
+                ),
+                order.getId(),
+                "mercadopago"
+        );
+
         Map<Long, String> primaryImages = fetchPrimaryImages(variations);
-        return orderMapper.toDTO(order, primaryImages);
+        OrderDTO dto = orderMapper.toDTO(order, primaryImages);
+        dto.setPixQrCode(paymentResponse.pixCode());
+        return dto;
     }
 
     private OrderDTO createOrderWithCard(CreateOrderRequest request) {
         User user = authService.authenticated();
+        validateUserPendingOrders(user);
         List<ProductVariation> variations = fetchVariations(request);
 
         Order order = orderFactory.createOrder(request, user, variations);
         applyCouponIfPresent(order, request.couponCode());
 
         BigDecimal total = order.getTotal();
-
-        // 1. Autoriza no gateway (ainda não cria pedido no DB)
         PaymentResponse authResponse = paymentService.authorize(
                 new PaymentRequest(
                         total,
                         "BRL",
-                        request.paymentMethod(),   // ex: "visa"
+                        request.paymentMethod(),
                         request.token(),
                         request.cardBrand(),
                         request.installments(),
@@ -93,11 +112,12 @@ public class OrderService {
             throw new BadRequestException("Pagamento recusado pelo cartão.");
         }
 
-        // 2. Agora sim salva o pedido
         repository.save(order);
 
-        // 3. Captura o pagamento no banco, vinculando ao pedido
         paymentService.capture(authResponse, order, "mercadopago", "card", request.cardBrand());
+
+        order.setStatus(OrderStatus.PAID);
+        repository.save(order);
 
         Map<Long, String> primaryImages = fetchPrimaryImages(variations);
         return orderMapper.toDTO(order, primaryImages);
@@ -131,6 +151,16 @@ public class OrderService {
                         ProductVariationImageProjection::getVariationId,
                         ProductVariationImageProjection::getImgUrl
                 ));
+    }
+
+    private void validateUserPendingOrders(User user) {
+        boolean hasPendingOrder = repository.existsByClientAndStatusIn(
+                user,
+                List.of(OrderStatus.WAITING_PAYMENT)
+        );
+        if (hasPendingOrder) {
+            throw new BadRequestException("Você já possui um pedido em andamento. Aguarde a finalização ou o cancelamento.");
+        }
     }
 
 }

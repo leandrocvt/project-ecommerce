@@ -10,6 +10,7 @@ import com.lcdev.ecommerce.domain.enums.OrderStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,8 @@ public class OrderFactory {
         Map<Long, ProductVariation> variationMap = variations.stream()
                 .collect(Collectors.toMap(ProductVariation::getId, Function.identity()));
 
+        applyExpirationIfNeeded(order, request.paymentMethod());
+
         Set<OrderItem> items = request.items().stream()
                 .map(itemRequest -> {
                     ProductVariation variation = variationMap.get(itemRequest.variationId());
@@ -47,6 +50,14 @@ public class OrderFactory {
         order.setShippingCost(request.shippingCost());
         order.setShippingDeadline(request.shippingDeadline());
         return order;
+    }
+
+    private void applyExpirationIfNeeded(Order order, String paymentMethod) {
+        if (paymentMethod == null) return;
+
+        if (paymentMethod.equalsIgnoreCase("pix") || paymentMethod.equalsIgnoreCase("boleto")) {
+            order.setExpirationMoment(Instant.now().plus(30, ChronoUnit.MINUTES));
+        }
     }
 
 }

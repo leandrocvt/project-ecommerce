@@ -7,6 +7,8 @@ import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundExcept
 import com.lcdev.ecommerce.domain.entities.Order;
 import com.lcdev.ecommerce.domain.entities.Payment;
 import com.lcdev.ecommerce.domain.entities.User;
+import com.lcdev.ecommerce.domain.enums.OrderStatus;
+import com.lcdev.ecommerce.domain.enums.PaymentStatus;
 import com.lcdev.ecommerce.domain.factories.PaymentGatewayFactory;
 import com.lcdev.ecommerce.infrastructure.payment.PaymentGateway;
 import com.lcdev.ecommerce.infrastructure.repositories.OrderRepository;
@@ -59,6 +61,40 @@ public class PaymentService {
     }
 
     @Transactional
+    public void updateStatusFromGateway(String transactionId, String gatewayName) {
+        // consulta o status atualizado direto no gateway
+        PaymentGateway gateway = gatewayFactory.getGateway(gatewayName);
+        PaymentStatusResponse statusResponse = gateway.checkStatus(transactionId);
+
+        // carrega o pagamento pelo transactionId
+        Payment payment = paymentRepository.findByTransactionId(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pagamento não encontrado: " + transactionId));
+
+        // atualiza status do pagamento
+        payment.setStatus(statusResponse.status());
+        payment.setMoment(Instant.now());
+        paymentRepository.save(payment);
+
+        // atualiza o pedido associado
+        Order order = payment.getOrder();
+        if (statusResponse.status() == PaymentStatus.PAID) {
+            order.setStatus(OrderStatus.PAID);
+        } else if (statusResponse.status() == PaymentStatus.FAILED) {
+            order.setStatus(OrderStatus.CANCELED);
+        }
+        orderRepository.save(order);
+    }
+
+    /**
+     * Consulta status direto no gateway.
+     */
+    @Transactional(readOnly = true)
+    public PaymentStatusResponse checkStatus(String transactionId, String gatewayName) {
+        PaymentGateway gateway = gatewayFactory.getGateway(gatewayName);
+        return gateway.checkStatus(transactionId);
+    }
+
+    @Transactional
     public void capture(PaymentResponse response, Order order, String gatewayName, String method, String cardBrand) {
         Payment payment = order.getPayment();
 
@@ -79,15 +115,6 @@ public class PaymentService {
 
         paymentRepository.save(payment);
         order.setPayment(payment);
-    }
-
-    /**
-     * Consulta status direto no gateway.
-     */
-    @Transactional(readOnly = true)
-    public PaymentStatusResponse checkStatus(String transactionId, String gatewayName) {
-        PaymentGateway gateway = gatewayFactory.getGateway(gatewayName);
-        return gateway.checkStatus(transactionId);
     }
 
     private PaymentRequest enrichRequestWithUser(PaymentRequest request, User user) {
