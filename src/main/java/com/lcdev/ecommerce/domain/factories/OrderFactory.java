@@ -1,12 +1,14 @@
 package com.lcdev.ecommerce.domain.factories;
 
 import com.lcdev.ecommerce.application.dto.order.CreateOrderRequest;
+import com.lcdev.ecommerce.application.service.exceptions.BadRequestException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
 import com.lcdev.ecommerce.domain.entities.Order;
 import com.lcdev.ecommerce.domain.entities.OrderItem;
 import com.lcdev.ecommerce.domain.entities.ProductVariation;
 import com.lcdev.ecommerce.domain.entities.User;
 import com.lcdev.ecommerce.domain.enums.OrderStatus;
+import com.lcdev.ecommerce.domain.enums.PaymentMethod;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -32,32 +34,26 @@ public class OrderFactory {
 
         applyExpirationIfNeeded(order, request.paymentMethod());
 
-        Set<OrderItem> items = request.items().stream()
-                .map(itemRequest -> {
-                    ProductVariation variation = variationMap.get(itemRequest.variationId());
-                    if (variation == null) {
-                        throw new ResourceNotFoundException("Variação não encontrada: " + itemRequest.variationId());
-                    }
-                    if (Boolean.FALSE.equals(variation.getProduct().getActive())) {
-                        throw new ResourceNotFoundException("Produto inativo: " + variation.getProduct().getId());
-                    }
-                    return new OrderItem(order, variation, itemRequest.quantity(), variation.getFinalPrice());
-                })
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        request.items().forEach(itemRequest -> {
+            ProductVariation variation = variationMap.get(itemRequest.variationId());
+            if (variation == null) {
+                throw new ResourceNotFoundException("Variação não encontrada: " + itemRequest.variationId());
+            }
+            order.addItem(variation, itemRequest.quantity());
+        });
 
-        order.setItems(items);
         order.setShippingMethod(request.shippingMethod());
         order.setShippingCost(request.shippingCost());
         order.setShippingDeadline(request.shippingDeadline());
         return order;
     }
 
-    private void applyExpirationIfNeeded(Order order, String paymentMethod) {
+    private void applyExpirationIfNeeded(Order order, PaymentMethod paymentMethod) {
         if (paymentMethod == null) return;
 
-        if (paymentMethod.equalsIgnoreCase("pix") || paymentMethod.equalsIgnoreCase("boleto")) {
+        if (paymentMethod.equals(PaymentMethod.PIX) || paymentMethod.equals(PaymentMethod.BOLETO)) {
             order.setExpirationMoment(Instant.now().plus(30, ChronoUnit.MINUTES));
         }
     }
-
 }
+

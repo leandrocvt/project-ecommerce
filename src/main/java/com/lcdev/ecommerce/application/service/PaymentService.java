@@ -79,8 +79,8 @@ public class PaymentService {
         Order order = payment.getOrder();
         if (statusResponse.status() == PaymentStatus.PAID) {
             order.setStatus(OrderStatus.PAID);
-        } else if (statusResponse.status() == PaymentStatus.FAILED) {
-            order.setStatus(OrderStatus.CANCELED);
+        } else if (statusResponse.status() == PaymentStatus.FAILED || statusResponse.status() == PaymentStatus.EXPIRED){
+            order.cancel();
         }
         orderRepository.save(order);
     }

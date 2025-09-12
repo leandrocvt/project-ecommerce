@@ -74,14 +74,53 @@ public class Order {
     }
 
     public void applyCoupon(Coupon coupon) {
+        if (coupon == null) {
+            throw new IllegalArgumentException("Cupom não pode ser nulo");
+        }
+
         BigDecimal subtotal = getSubtotal();
+
+        if (!coupon.isValid(subtotal)) {
+            throw new IllegalArgumentException("Cupom inválido ou expirado");
+        }
+
         BigDecimal discount = coupon.calculateDiscount(subtotal)
                 .setScale(2, RoundingMode.HALF_UP);
 
         this.coupon = coupon;
         this.discountApplied = discount;
 
-        coupon.incrementUsage();
+        coupon.useOnce();
+    }
+
+    public void cancel() {
+        if (this.status == OrderStatus.CANCELED) {
+            return;
+        }
+        this.status = OrderStatus.CANCELED;
+        restoreStock();
+    }
+
+    private void restoreStock() {
+        for (OrderItem item : this.items) {
+            item.getVariation().increaseStock(item.getQuantity());
+        }
+    }
+
+    public void addItem(ProductVariation variation, int quantity) {
+        if (variation == null) {
+            throw new IllegalArgumentException("Variação não pode ser nula");
+        }
+        if (Boolean.FALSE.equals(variation.getProduct().getActive())) {
+            throw new IllegalStateException("Produto inativo: " + variation.getProduct().getId());
+        }
+        if (variation.getStockQuantity() < quantity) {
+            throw new IllegalStateException("Produto " + variation.getProduct().getName() + " sem estoque suficiente");
+        }
+
+        variation.decreaseStock(quantity);
+        OrderItem item = new OrderItem(this, variation, quantity, variation.getFinalPrice());
+        this.items.add(item);
     }
 
     @Override

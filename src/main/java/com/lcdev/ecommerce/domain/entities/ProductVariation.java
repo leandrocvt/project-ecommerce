@@ -66,6 +66,26 @@ public class ProductVariation {
         return disc.multiply(new BigDecimal("100")).divide(base, 2, java.math.RoundingMode.HALF_UP);
     }
 
+    public void decreaseStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantidade deve ser maior que zero");
+        }
+        if (stockQuantity == null || stockQuantity < quantity) {
+            throw new IllegalStateException("Estoque insuficiente para a variação " + id);
+        }
+        stockQuantity -= quantity;
+    }
+
+    public void increaseStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantidade deve ser maior que zero");
+        }
+        if (stockQuantity == null) {
+            stockQuantity = 0;
+        }
+        stockQuantity += quantity;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) return true;

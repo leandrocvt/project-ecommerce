@@ -1,5 +1,6 @@
 package com.lcdev.ecommerce.application.dto.order;
 
+import com.lcdev.ecommerce.domain.enums.PaymentMethod;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
@@ -20,8 +21,8 @@ public record CreateOrderRequest(
         @NotNull(message = "Prazo de entrega é obrigatório!")
         @FutureOrPresent(message = "O prazo de entrega deve ser hoje ou uma data futura")
         LocalDate shippingDeadline,
-        @NotBlank
-        String paymentMethod,
+        @NotNull(message = "Método de pagamento é obrigatório!")
+        PaymentMethod paymentMethod,
         String cardBrand,
         String token,
         Integer installments,

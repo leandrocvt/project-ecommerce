@@ -64,11 +64,21 @@ public class Coupon {
         return discountValue.min(orderTotal);
     }
 
-    public void incrementUsage() {
+    public void useOnce() {
         if (maxUses != null && currentUses >= maxUses) {
             throw new IllegalStateException("Limite de uso atingido");
         }
+
         this.currentUses++;
+
+        if (maxUses != null && currentUses >= maxUses) {
+            this.status = CouponStatus.EXPIRED;
+        }
+    }
+
+    public boolean isExpired() {
+        return CouponStatus.EXPIRED.equals(this.status)
+                || (validUntil != null && validUntil.isBefore(LocalDate.now()));
     }
 
     @Override

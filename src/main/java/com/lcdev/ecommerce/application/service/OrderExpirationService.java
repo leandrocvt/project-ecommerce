@@ -35,7 +35,7 @@ public class OrderExpirationService {
         );
 
         for (Order order : expiredOrders) {
-            order.setStatus(OrderStatus.CANCELED);
+            order.cancel();
 
             Payment payment = order.getPayment();
             if (payment != null && payment.getStatus() == PaymentStatus.PENDING) {
