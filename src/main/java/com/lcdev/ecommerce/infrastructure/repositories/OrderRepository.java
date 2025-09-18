@@ -82,14 +82,28 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("""
                 select o from Order o
+                left join fetch o.client c
                 left join fetch o.items i
                 left join fetch i.id.variation v
                 left join fetch v.product p
-                left join fetch p.category c
+                left join fetch p.category cat
                 left join fetch o.payment pay
                 left join fetch o.coupon cp
                 where o.client = :client and o.id = :id
             """)
     Optional<Order> findByIdAndClientWithDetails(@Param("id") Long id, @Param("client") User client);
+
+    @Query("""
+                select o from Order o
+                left join fetch o.client c
+                left join fetch o.items i
+                left join fetch i.id.variation v
+                left join fetch v.product p
+                left join fetch p.category cat
+                left join fetch o.payment pay
+                left join fetch o.coupon cp
+                where o.id = :id
+            """)
+    Optional<Order> findByIdWithDetails(@Param("id") Long id);
 
 }

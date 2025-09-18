@@ -49,6 +49,12 @@ public class OrderController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderDTO> findOrderByIdForAdmin(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findOrderByIdForAdmin(id));
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<PageResponse<OrderResponseDTO>> findAll(
             @RequestParam(required = false) Long id,

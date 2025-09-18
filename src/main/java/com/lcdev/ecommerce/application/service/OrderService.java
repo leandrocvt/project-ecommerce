@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,7 +79,19 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderDTO findMyOrderById(Long id) {
         User user = authService.authenticated();
-        Order order = repository.findByIdAndClientWithDetails(id, user)
+        return findOrderByIdInternal(id, user);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderDTO findOrderByIdForAdmin(Long id) {
+        return findOrderByIdInternal(id, null);
+    }
+
+    private OrderDTO findOrderByIdInternal(Long id, User client) {
+        Order order = (Objects.isNull(client))
+                ? repository.findByIdWithDetails(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado"))
+                : repository.findByIdAndClientWithDetails(id, client)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado"));
 
         List<Long> variationIds = order.getItems().stream()
