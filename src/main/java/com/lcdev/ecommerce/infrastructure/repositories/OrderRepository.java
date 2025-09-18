@@ -3,7 +3,10 @@ package com.lcdev.ecommerce.infrastructure.repositories;
 import com.lcdev.ecommerce.domain.entities.Order;
 import com.lcdev.ecommerce.domain.entities.User;
 import com.lcdev.ecommerce.domain.enums.OrderStatus;
+import com.lcdev.ecommerce.infrastructure.projections.OrderProjection;
 import com.lcdev.ecommerce.infrastructure.projections.OrderSummaryWithImageProjection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,6 +21,38 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     boolean existsByClientAndStatusIn(User client, List<OrderStatus> statuses);
 
     List<Order> findByStatusAndExpirationMomentBefore(OrderStatus status, Instant now);
+
+    @Query("""
+                SELECT 
+                    o.id AS id,
+                    o.moment AS moment,
+                    o.status AS status,
+                    COALESCE(SUM(oi.price * oi.quantity), 0) AS subtotal,
+                    o.shippingCost AS shippingCost,
+                    o.discountApplied AS discountApplied,
+                    CONCAT(c.firstName, ' ', c.lastName) AS clientName,
+                    pay.moment AS paymentMoment
+                FROM Order o
+                LEFT JOIN o.client c
+                LEFT JOIN o.payment pay
+                LEFT JOIN o.items oi
+                WHERE (:id IS NULL OR o.id = :id)
+                  AND (:status IS NULL OR o.status = :status)
+                  AND (:startDate IS NULL OR o.moment >= :startDate)
+                  AND (:endDate IS NULL OR o.moment <= :endDate)
+                  AND (:clientName IS NULL OR LOWER(CONCAT(c.firstName, ' ', c.lastName)) LIKE LOWER(CONCAT('%', :clientName, '%')))
+                GROUP BY o.id, o.moment, o.status, o.shippingCost, o.discountApplied, c.firstName, c.lastName, pay.moment
+                ORDER BY o.status ASC, o.moment DESC
+            """)
+    Page<OrderProjection> search(
+            @Param("id") Long id,
+            @Param("status") OrderStatus status,
+            @Param("startDate") Instant startDate,
+            @Param("endDate") Instant endDate,
+            @Param("clientName") String clientName,
+            Pageable pageable
+    );
+
 
     @Query("""
                 select o.id as id,

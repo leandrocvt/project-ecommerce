@@ -2,22 +2,26 @@ package com.lcdev.ecommerce.application.service;
 
 import com.lcdev.ecommerce.application.dto.order.CreateOrderRequest;
 import com.lcdev.ecommerce.application.dto.order.OrderDTO;
+import com.lcdev.ecommerce.application.dto.order.OrderResponseDTO;
 import com.lcdev.ecommerce.application.dto.order.OrderSummaryDTO;
 import com.lcdev.ecommerce.application.service.exceptions.BadRequestException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
 import com.lcdev.ecommerce.application.service.payment.PaymentProcessor;
 import com.lcdev.ecommerce.domain.entities.Order;
-import com.lcdev.ecommerce.domain.factories.PaymentProcessorFactory;
 import com.lcdev.ecommerce.domain.entities.User;
 import com.lcdev.ecommerce.domain.enums.OrderStatus;
-import com.lcdev.ecommerce.infrastructure.mapper.impl.OrderMapperImpl;
+import com.lcdev.ecommerce.domain.factories.PaymentProcessorFactory;
+import com.lcdev.ecommerce.infrastructure.mapper.OrderMapper;
 import com.lcdev.ecommerce.infrastructure.projections.ProductVariationImageProjection;
 import com.lcdev.ecommerce.infrastructure.repositories.OrderRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.ProductVariationImageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,7 +33,7 @@ public class OrderService {
     private final OrderRepository repository;
     private final AuthService authService;
     private final PaymentProcessorFactory processorFactory;
-    private final OrderMapperImpl orderMapper;
+    private final OrderMapper orderMapper;
     private final ProductVariationImageRepository imageRepository;
 
     @Transactional
@@ -40,6 +44,20 @@ public class OrderService {
         PaymentProcessor processor = processorFactory.getProcessor(request.paymentMethod());
         return processor.process(request, user);
     }
+
+    @Transactional(readOnly = true)
+    public Page<OrderResponseDTO> findAll(
+            Long id,
+            OrderStatus status,
+            Instant startDate,
+            Instant endDate,
+            String clientName,
+            Pageable pageable
+    ) {
+        return repository.search(id, status, startDate, endDate, clientName, pageable)
+                .map(OrderResponseDTO::fromProjection);
+    }
+
 
     @Transactional(readOnly = true)
     public List<OrderSummaryDTO> findMyOrders() {

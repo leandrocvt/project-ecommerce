@@ -1,7 +1,6 @@
 package com.lcdev.ecommerce.application.dto.order;
 
 import com.lcdev.ecommerce.domain.enums.OrderStatus;
-import com.lcdev.ecommerce.domain.enums.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.time.Instant;

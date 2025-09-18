@@ -1,12 +1,10 @@
 package com.lcdev.ecommerce.infrastructure.mapper;
 
-import com.lcdev.ecommerce.application.dto.order.CreateOrderRequest;
 import com.lcdev.ecommerce.application.dto.order.OrderDTO;
+import com.lcdev.ecommerce.application.dto.order.OrderResponseDTO;
 import com.lcdev.ecommerce.domain.entities.Order;
-import com.lcdev.ecommerce.domain.entities.ProductVariation;
-import com.lcdev.ecommerce.domain.entities.User;
+import org.aspectj.weaver.ast.Or;
 
-import java.util.List;
 import java.util.Map;
 
 public interface OrderMapper {
