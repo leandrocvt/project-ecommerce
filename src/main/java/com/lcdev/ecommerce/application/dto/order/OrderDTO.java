@@ -1,5 +1,6 @@
 package com.lcdev.ecommerce.application.dto.order;
 
+import com.lcdev.ecommerce.application.dto.address.ShippingAddressDTO;
 import com.lcdev.ecommerce.application.dto.payment.PaymentDTO;
 import com.lcdev.ecommerce.application.dto.user.ClientDTO;
 import com.lcdev.ecommerce.domain.entities.Order;
@@ -33,6 +34,9 @@ public class OrderDTO {
     private String shippingMethod;
     private BigDecimal shippingCost;
     private LocalDate shippingDeadline;
+
+    private ShippingAddressDTO shippingAddressDTO;
+
     private String pixQrCode;
 
     public OrderDTO(Order entity, List<OrderItemDTO> itemDTOs) {
@@ -48,6 +52,16 @@ public class OrderDTO {
         this.shippingCost = entity.getShippingCost();
         this.shippingDeadline = entity.getShippingDeadline();
         this.total = entity.getTotal();
+
+        this.shippingAddressDTO = new ShippingAddressDTO(
+                entity.getShippingRoad(),
+                entity.getShippingNeighborhood(),
+                entity.getShippingCity(),
+                entity.getShippingState(),
+                entity.getShippingZipCode(),
+                entity.getShippingNumber(),
+                entity.getShippingComplement()
+        );
     }
 
 }

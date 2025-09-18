@@ -3,10 +3,7 @@ package com.lcdev.ecommerce.domain.factories;
 import com.lcdev.ecommerce.application.dto.order.CreateOrderRequest;
 import com.lcdev.ecommerce.application.service.exceptions.BadRequestException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
-import com.lcdev.ecommerce.domain.entities.Order;
-import com.lcdev.ecommerce.domain.entities.OrderItem;
-import com.lcdev.ecommerce.domain.entities.ProductVariation;
-import com.lcdev.ecommerce.domain.entities.User;
+import com.lcdev.ecommerce.domain.entities.*;
 import com.lcdev.ecommerce.domain.enums.OrderStatus;
 import com.lcdev.ecommerce.domain.enums.PaymentMethod;
 import org.springframework.stereotype.Component;
@@ -42,6 +39,19 @@ public class OrderFactory {
             order.addItem(variation, itemRequest.quantity());
         });
 
+        Address address = user.getAddresses().stream()
+                .filter(a -> a.getId().equals(request.addressId()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Endereço não encontrado para este usuário"));
+
+        order.setShippingRoad(address.getRoad());
+        order.setShippingNeighborhood(address.getNeighborhood());
+        order.setShippingCity(address.getCity());
+        order.setShippingState(address.getState());
+        order.setShippingZipCode(address.getZipCode());
+        order.setShippingNumber(address.getNumber());
+        order.setShippingComplement(address.getComplement());
+
         order.setShippingMethod(request.shippingMethod());
         order.setShippingCost(request.shippingCost());
         order.setShippingDeadline(request.shippingDeadline());
@@ -52,7 +62,7 @@ public class OrderFactory {
         if (paymentMethod == null) return;
 
         if (paymentMethod.equals(PaymentMethod.PIX) || paymentMethod.equals(PaymentMethod.BOLETO)) {
-            order.setExpirationMoment(Instant.now().plus(30, ChronoUnit.MINUTES));
+            order.setExpirationMoment(Instant.now().plus(1, ChronoUnit.MINUTES));
         }
     }
 }

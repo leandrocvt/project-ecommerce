@@ -25,7 +25,7 @@ public class OrderExpirationService {
      * Fallback: roda 1 vez por hora e cancela pedidos que não foram atualizados pelo webhook.
      */
     @Transactional
-    @Scheduled(fixedRate = 3600000) // 1h
+    @Scheduled(fixedRate = 120000) // 1h
     public void cancelExpiredOrders() {
         Instant now = Instant.now();
 

@@ -34,7 +34,7 @@ public class Order {
     @JoinColumn(name = "client_id")
     private User client;
 
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Payment payment;
 
     @Column(name = "expiration_moment", columnDefinition = "TIMESTAMP WITHOUT TIME ZONE", nullable = true)
@@ -53,6 +53,15 @@ public class Order {
     private String shippingMethod;
     private BigDecimal shippingCost;
     private LocalDate shippingDeadline;
+
+    private String shippingRoad;
+    private String shippingNeighborhood;
+    private String shippingCity;
+    private String shippingState;
+    private String shippingZipCode;
+    private String shippingNumber;
+    private String shippingComplement;
+
 
     public BigDecimal getSubtotal() {
         return items.stream()

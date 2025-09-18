@@ -27,6 +27,8 @@ public record CreateOrderRequest(
         String token,
         Integer installments,
         String payerIdentificationNumber,
-        String payerIdentificationType
+        String payerIdentificationType,
+        @NotNull(message = "Um enderço é obrigatório!")
+        Long addressId
 ) {
 }
