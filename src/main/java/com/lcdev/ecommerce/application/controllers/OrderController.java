@@ -2,10 +2,7 @@ package com.lcdev.ecommerce.application.controllers;
 
 import com.lcdev.ecommerce.application.dto.PageResponse;
 import com.lcdev.ecommerce.application.dto.coupon.CouponResponseDTO;
-import com.lcdev.ecommerce.application.dto.order.CreateOrderRequest;
-import com.lcdev.ecommerce.application.dto.order.OrderDTO;
-import com.lcdev.ecommerce.application.dto.order.OrderResponseDTO;
-import com.lcdev.ecommerce.application.dto.order.OrderSummaryDTO;
+import com.lcdev.ecommerce.application.dto.order.*;
 import com.lcdev.ecommerce.application.service.OrderService;
 import com.lcdev.ecommerce.domain.enums.OrderStatus;
 import jakarta.validation.Valid;
@@ -68,6 +65,16 @@ public class OrderController {
         Pageable pageable = PageRequest.of(page, sizePage);
         Page<OrderResponseDTO> result = service.findAll(id, status, startDate, endDate, clientName, pageable);
         return ResponseEntity.ok(PageResponse.from(result));
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PutMapping("/{id}/status")
+    public ResponseEntity<OrderDTO> updateStatus(
+            @PathVariable Long id,
+            @RequestBody @Valid OrderUpdateStatus dto
+    ) {
+        OrderDTO updated = service.updateStatus(dto, id);
+        return ResponseEntity.ok(updated);
     }
 
 }

@@ -1,9 +1,7 @@
 package com.lcdev.ecommerce.application.service;
 
-import com.lcdev.ecommerce.application.dto.order.CreateOrderRequest;
-import com.lcdev.ecommerce.application.dto.order.OrderDTO;
-import com.lcdev.ecommerce.application.dto.order.OrderResponseDTO;
-import com.lcdev.ecommerce.application.dto.order.OrderSummaryDTO;
+import com.lcdev.ecommerce.application.dto.order.*;
+import com.lcdev.ecommerce.application.dto.user.UserUpdateDTO;
 import com.lcdev.ecommerce.application.service.exceptions.BadRequestException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
 import com.lcdev.ecommerce.application.service.payment.PaymentProcessor;
@@ -85,6 +83,34 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderDTO findOrderByIdForAdmin(Long id) {
         return findOrderByIdInternal(id, null);
+    }
+
+    @Transactional
+    public OrderDTO updateStatus(OrderUpdateStatus dto, Long id) {
+        Order order = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado"));
+
+        validateStatusTransition(order.getStatus(), dto.status());
+
+        order.setStatus(dto.status());
+        order = repository.save(order);
+
+        return orderMapper.toDTO(order, Map.of());
+    }
+
+    private void validateStatusTransition(OrderStatus current, OrderStatus next) {
+
+        if (current == OrderStatus.DELIVERED) {
+            throw new ResourceNotFoundException("Não é permitido alterar pedido já entregue");
+        }
+
+        if (current.compareTo(OrderStatus.INVOICE_ISSUED) >= 0 && next == OrderStatus.CANCELED) {
+            throw new ResourceNotFoundException("Não é permitido cancelar pedido após emissão da nota fiscal");
+        }
+
+        if (next.ordinal() < current.ordinal() && next != OrderStatus.CANCELED) {
+            throw new ResourceNotFoundException("Transição de status inválida: não é possível retroceder");
+        }
     }
 
     private OrderDTO findOrderByIdInternal(Long id, User client) {
