@@ -1,7 +1,6 @@
 package com.lcdev.ecommerce.domain.entities;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
