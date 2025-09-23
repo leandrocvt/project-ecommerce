@@ -1,13 +1,16 @@
 package com.lcdev.ecommerce.application.controllers;
 
 import com.lcdev.ecommerce.application.dto.*;
+import com.lcdev.ecommerce.application.dto.assessment.AssessmentRequestDTO;
 import com.lcdev.ecommerce.application.dto.assessment.AssessmentResponseDTO;
 import com.lcdev.ecommerce.application.service.AssessmentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +42,14 @@ public class AssessmentController {
         Page<AssessmentResponseDTO> result = service.search(productId, pageable);
 
         return ResponseEntity.ok(PageResponse.from(result));
+    }
+
+
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    @PostMapping
+    public ResponseEntity<AssessmentResponseDTO> create(@RequestBody @Valid AssessmentRequestDTO dto) {
+        AssessmentResponseDTO response = service.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 

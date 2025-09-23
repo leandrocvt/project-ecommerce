@@ -1,8 +1,10 @@
 package com.lcdev.ecommerce.application.service;
 
+import com.lcdev.ecommerce.application.dto.message.EmailMessageDTO;
 import com.lcdev.ecommerce.application.dto.order.*;
 import com.lcdev.ecommerce.application.dto.user.UserUpdateDTO;
 import com.lcdev.ecommerce.application.service.exceptions.BadRequestException;
+import com.lcdev.ecommerce.application.service.exceptions.BusinessException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
 import com.lcdev.ecommerce.application.service.payment.PaymentProcessor;
 import com.lcdev.ecommerce.domain.entities.Order;
@@ -10,10 +12,13 @@ import com.lcdev.ecommerce.domain.entities.User;
 import com.lcdev.ecommerce.domain.enums.OrderStatus;
 import com.lcdev.ecommerce.domain.factories.PaymentProcessorFactory;
 import com.lcdev.ecommerce.infrastructure.mapper.OrderMapper;
+import com.lcdev.ecommerce.infrastructure.messaging.listener.OrderEventListener;
+import com.lcdev.ecommerce.infrastructure.messaging.rabbitmq.EmailProducer;
 import com.lcdev.ecommerce.infrastructure.projections.ProductVariationImageProjection;
 import com.lcdev.ecommerce.infrastructure.repositories.OrderRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.ProductVariationImageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,6 +39,8 @@ public class OrderService {
     private final PaymentProcessorFactory processorFactory;
     private final OrderMapper orderMapper;
     private final ProductVariationImageRepository imageRepository;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     @Transactional
     public OrderDTO insert(CreateOrderRequest request) {
@@ -94,6 +101,10 @@ public class OrderService {
 
         order.setStatus(dto.status());
         order = repository.save(order);
+
+        if (dto.status() == OrderStatus.DELIVERED) {
+            eventPublisher.publishEvent(new OrderDeliveredEvent(order.getId(), order.getClient().getId()));
+        }
 
         return orderMapper.toDTO(order, Map.of());
     }

@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    boolean existsByClientAndStatusIn(User client, List<OrderStatus> statuses);
+    boolean existsByClientAndStatusIn(User client, List<OrderStatus> status);
 
     List<Order> findByStatusAndExpirationMomentBefore(OrderStatus status, Instant now);
 
@@ -105,5 +105,20 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                 where o.id = :id
             """)
     Optional<Order> findByIdWithDetails(@Param("id") Long id);
+
+    @Query("""
+                SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END
+                FROM Order o
+                JOIN o.items i
+                JOIN i.id.variation v
+                WHERE o.client.id = :clientId
+                  AND v.product.id = :productId
+                  AND o.status = :status
+            """)
+    boolean existsByClientAndProductAndStatus(
+            @Param("clientId") Long clientId,
+            @Param("productId") Long productId,
+            @Param("status") OrderStatus status
+    );
 
 }

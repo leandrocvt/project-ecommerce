@@ -1,6 +1,8 @@
 package com.lcdev.ecommerce.infrastructure.repositories;
 
 import com.lcdev.ecommerce.domain.entities.Assessment;
+import com.lcdev.ecommerce.domain.entities.Product;
+import com.lcdev.ecommerce.domain.entities.User;
 import com.lcdev.ecommerce.infrastructure.projections.AssessmentProjection;
 import com.lcdev.ecommerce.infrastructure.projections.ReviewSummaryProjection;
 import org.springframework.data.domain.Page;
@@ -10,8 +12,24 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface AssessmentRepository extends JpaRepository<Assessment, Long> {
+
+    @Query("""
+                SELECT 
+                    a.id AS id,
+                    a.score AS score,
+                    a.comment AS comment,
+                    a.photoUrl AS photoUrl,
+                    CONCAT(u.firstName, ' ', u.lastName) AS username,
+                    a.createdAt AS createdAt
+                FROM Assessment a
+                JOIN a.user u
+                WHERE a.id = :id
+            """)
+    Optional<AssessmentProjection> findProjectionById(@Param("id") Long id);
 
     @Query("""
             SELECT 
@@ -36,5 +54,6 @@ public interface AssessmentRepository extends JpaRepository<Assessment, Long> {
             """)
     ReviewSummaryProjection findReviewSummaryByProductId(@Param("productId") Long productId);
 
+    boolean existsByUserAndProduct(User user, Product product);
 }
 
