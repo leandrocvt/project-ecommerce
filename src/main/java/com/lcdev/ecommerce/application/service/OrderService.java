@@ -17,6 +17,7 @@ import com.lcdev.ecommerce.infrastructure.messaging.rabbitmq.EmailProducer;
 import com.lcdev.ecommerce.infrastructure.projections.ProductVariationImageProjection;
 import com.lcdev.ecommerce.infrastructure.repositories.OrderRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.ProductVariationImageRepository;
+import com.lcdev.ecommerce.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -40,11 +41,12 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final ProductVariationImageRepository imageRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserRepository userRepository;
 
 
     @Transactional
     public OrderDTO insert(CreateOrderRequest request) {
-        User user = authService.authenticated();
+        User user = authService.authenticated(userRepository::findByEmailWithAddresses);
         validateUserPendingOrders(user);
 
         PaymentProcessor processor = processorFactory.getProcessor(request.paymentMethod());
@@ -67,7 +69,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderSummaryDTO> findMyOrders() {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
 
         return repository.findOrdersSummaryWithImage(user).stream()
                 .map(summary -> new OrderSummaryDTO(
@@ -83,7 +85,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderDTO findMyOrderById(Long id) {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
         return findOrderByIdInternal(id, user);
     }
 
@@ -158,6 +160,10 @@ public class OrderService {
         if (hasPendingOrder) {
             throw new BadRequestException("Você já possui um pedido em andamento. Aguarde a finalização ou o cancelamento.");
         }
+    }
+
+    private User getCurrentUser() {
+        return authService.authenticated(userRepository::findByEmailOptional);
     }
 
 }

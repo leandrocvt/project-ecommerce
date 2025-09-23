@@ -13,6 +13,7 @@ import com.lcdev.ecommerce.domain.factories.PaymentGatewayFactory;
 import com.lcdev.ecommerce.infrastructure.payment.PaymentGateway;
 import com.lcdev.ecommerce.infrastructure.repositories.OrderRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.PaymentRepository;
+import com.lcdev.ecommerce.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class PaymentService {
 
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
+    private final UserRepository userRepository;
     private final PaymentGatewayFactory gatewayFactory;
     private final AuthService authService;
 
@@ -33,7 +35,7 @@ public class PaymentService {
      */
     @Transactional
     public PaymentResponse processPaymentForOrder(PaymentRequest request, Long orderId, String gatewayName) {
-        User user = authService.authenticated();
+        User user = authService.authenticated(userRepository::findByEmailWithAddresses);
         PaymentRequest enrichedRequest = enrichRequestWithUser(request, user);
 
         Order order = orderRepository.findById(orderId)
@@ -53,7 +55,7 @@ public class PaymentService {
      */
     @Transactional(readOnly = true)
     public PaymentResponse authorize(PaymentRequest request, String gatewayName) {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
         PaymentRequest enrichedRequest = enrichRequestWithUser(request, user);
 
         PaymentGateway gateway = gatewayFactory.getGateway(gatewayName);
@@ -129,6 +131,10 @@ public class PaymentService {
                 request.payerIdentificationType(),
                 request.payerIdentificationNumber()
         );
+    }
+
+    private User getCurrentUser() {
+        return authService.authenticated(userRepository::findByEmailOptional);
     }
 
 }

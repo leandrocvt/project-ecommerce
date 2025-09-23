@@ -36,14 +36,14 @@ public class UserController {
         return ResponseEntity.ok(PageResponse.from(result));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping(value = "/{id}")
     public ResponseEntity<UserResponseDTO> findById(@PathVariable Long id){
         UserResponseDTO dto  = service.findById(id);
         return ResponseEntity.ok().body(dto);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @GetMapping(value = "/profile")
     public ResponseEntity<UserResponseDTO> findProfile(){
         UserResponseDTO dto  = service.findProfile();

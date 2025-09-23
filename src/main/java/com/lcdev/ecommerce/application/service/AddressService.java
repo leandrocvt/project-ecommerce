@@ -6,6 +6,7 @@ import com.lcdev.ecommerce.domain.entities.Address;
 import com.lcdev.ecommerce.domain.entities.User;
 import com.lcdev.ecommerce.infrastructure.mapper.AddressMapper;
 import com.lcdev.ecommerce.infrastructure.repositories.AddressRepository;
+import com.lcdev.ecommerce.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +18,11 @@ public class AddressService {
     private final AddressRepository repository;
     private final AddressMapper addressMapper;
     private final AuthService authService;
+    private final UserRepository userRepository;
 
     @Transactional
     public AddressDTO addAddress(AddressDTO dto) {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
         Address address = addressMapper.toEntity(dto, user);
         address = repository.save(address);
         return addressMapper.toDTO(address);
@@ -28,7 +30,7 @@ public class AddressService {
 
     @Transactional
     public AddressDTO updateAddress(Long addressId, AddressDTO dto) {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
         Address address = repository.findByIdAndUser_Id(addressId, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Endereço não encontrado"));
 
@@ -40,13 +42,17 @@ public class AddressService {
 
     @Transactional
     public void deleteAddress(Long addressId) {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
         Address address = repository.findByIdAndUser_Id(addressId, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Endereço não encontrado"));
 
         user.getAddresses().remove(address);
 
         repository.deleteById(address.getId());
+    }
+
+    private User getCurrentUser() {
+        return authService.authenticated(userRepository::findByEmailOptional);
     }
 
 }

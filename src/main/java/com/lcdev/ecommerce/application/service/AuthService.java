@@ -21,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -78,16 +80,15 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    protected User authenticated() {
+    public User authenticated(Function<String, Optional<User>> finder) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Jwt jwtPrincipal = (Jwt) authentication.getPrincipal();
             String username = jwtPrincipal.getClaim("username");
 
-            return userRepository.findByEmailWithAddresses(username)
+            return finder.apply(username)
                     .orElseThrow(() -> new UsernameNotFoundException("Invalid user"));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new UsernameNotFoundException("Invalid user");
         }
     }

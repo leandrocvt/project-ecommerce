@@ -13,6 +13,7 @@ import com.lcdev.ecommerce.infrastructure.projections.AssessmentProjection;
 import com.lcdev.ecommerce.infrastructure.repositories.AssessmentRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.OrderRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.ProductRepository;
+import com.lcdev.ecommerce.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ public class AssessmentService {
     private final OrderRepository orderRepository;
     private final AuthService authService;
     private final AssessmentMapper mapper;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public Page<AssessmentResponseDTO> search(Long productId, Pageable pageable) {
@@ -39,7 +41,7 @@ public class AssessmentService {
 
     @Transactional
     public AssessmentResponseDTO create(AssessmentRequestDTO dto) {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
 
         Product product = productRepository.findById(dto.productId())
                 .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
@@ -60,5 +62,8 @@ public class AssessmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Erro ao carregar avaliação criada"));
     }
 
+    private User getCurrentUser() {
+        return authService.authenticated(userRepository::findByEmailOptional);
+    }
 
 }

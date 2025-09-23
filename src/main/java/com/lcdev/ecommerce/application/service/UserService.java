@@ -38,8 +38,8 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final AddressMapper addressMapper;
-    private final AddressRepository addressRepository;
     private final AuthService authService;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public Page<UserMinResponseDTO> findAll(String email, Pageable pageable) {
@@ -77,13 +77,13 @@ public class UserService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     public UserResponseDTO findProfile(){
-        User entity = authService.authenticated();
+        User entity = authService.authenticated(userRepository::findByEmailWithAddresses);
         return userMapper.mapUserResponseDTO(entity);
     }
 
     @Transactional
     public UserResponseDTO update(UserUpdateDTO dto){
-        User entity = authService.authenticated();
+        User entity = getCurrentUser();
         entity = userMapper.mapUpdate(dto, entity);
         entity = repository.save(entity);
         return userMapper.mapUserResponseDTO(entity);
@@ -91,7 +91,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void updateEmail(UserUpdateEmailDTO dto) {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new BadRequestException("Senha incorreta!");
@@ -107,7 +107,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void updatePassword(UserUpdatePasswordDTO dto) {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
 
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
             throw new BadRequestException("Senha incorreta!");
@@ -147,4 +147,9 @@ public class UserService implements UserDetailsService {
 
         return user;
     }
+
+    private User getCurrentUser() {
+        return authService.authenticated(userRepository::findByEmailOptional);
+    }
+
 }

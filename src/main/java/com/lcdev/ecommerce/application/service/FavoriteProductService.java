@@ -8,6 +8,7 @@ import com.lcdev.ecommerce.infrastructure.projections.ProductMinProjection;
 import com.lcdev.ecommerce.infrastructure.repositories.FavoriteProductRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.ProductRepository;
 import com.lcdev.ecommerce.infrastructure.repositories.ProductVariationRepository;
+import com.lcdev.ecommerce.infrastructure.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,10 +22,11 @@ public class FavoriteProductService {
     private final FavoriteProductRepository repository;
     private final ProductVariationRepository variationRepository;
     private final AuthService authService;
+    private final UserRepository userRepository;
 
     @Transactional
     public void addFavorite(Long variationId) {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
         ProductVariation variation = variationRepository.findById(variationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Variação não encontrada"));
 
@@ -39,18 +41,22 @@ public class FavoriteProductService {
 
     @Transactional
     public void removeFavorite(Long productId) {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
         FavoriteProductPK pk = new FavoriteProductPK(productId, user.getId());
         repository.deleteById(pk);
     }
 
     @Transactional(readOnly = true)
     public List<ProductMinResponseDTO> listFavorites() {
-        User user = authService.authenticated();
+        User user = getCurrentUser();
         List<ProductMinProjection> favorites = repository.findFavoriteProductsByUserId(user.getId());
         return favorites.stream()
                 .map(ProductMinResponseDTO::from)
                 .toList();
+    }
+
+    private User getCurrentUser() {
+        return authService.authenticated(userRepository::findByEmailOptional);
     }
 
 }
