@@ -1,6 +1,7 @@
 package com.lcdev.ecommerce.application.service;
 
 import com.lcdev.ecommerce.application.dto.address.AddressDTO;
+import com.lcdev.ecommerce.application.service.exceptions.BadRequestException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
 import com.lcdev.ecommerce.domain.entities.Address;
 import com.lcdev.ecommerce.domain.entities.User;
@@ -23,6 +24,12 @@ public class AddressService {
     @Transactional
     public AddressDTO addAddress(AddressDTO dto) {
         User user = getCurrentUser();
+
+        repository.findDuplicateByZipCodeAndNumber(user, dto.getZipCode(), dto.getNumber())
+                .ifPresent(a -> {
+                    throw new BadRequestException("Endereço já cadastrado para este usuário");
+                });
+
         Address address = addressMapper.toEntity(dto, user);
         address = repository.save(address);
         return addressMapper.toDTO(address);
