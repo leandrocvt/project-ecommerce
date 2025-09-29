@@ -105,6 +105,7 @@ public class OrderService {
         order = repository.save(order);
 
         if (dto.status() == OrderStatus.DELIVERED) {
+            order.setDeliveredAt(Instant.now());
             eventPublisher.publishEvent(new OrderDeliveredEvent(order.getId(), order.getClient().getId()));
         }
 
