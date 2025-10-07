@@ -16,29 +16,17 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductVariationDTO {
+public class ProductVariationResponseDTO {
 
     private Long id;
-
-    @NotNull(message = "A cor da variação é obrigatória.")
     private Color color;
-
-    @NotNull(message = "O tamanho da variação é obrigatório.")
     private Size size;
-
-    @PositiveOrZero(message = "O ajuste de preço não pode ser negativo.")
     private BigDecimal priceAdjustment;
-
-    @PositiveOrZero(message = "O desconto não pode ser negativo.")
     private BigDecimal discountAmount;
-
-    @NotNull(message = "Quantidade em estoque é obrigatória.")
-    @PositiveOrZero(message = "Estoque não pode ser negativo.")
     private Integer stockQuantity;
-
     private List<ProductVariationImageDTO> images;
 
-    public ProductVariationDTO(ProductVariation variation) {
+    public ProductVariationResponseDTO(ProductVariation variation) {
         id = variation.getId();
         color = variation.getColor();
         size = variation.getSize();
@@ -50,6 +38,10 @@ public class ProductVariationDTO {
                     .map(img -> new ProductVariationImageDTO(img.getId(), img.getImgUrl(), img.isPrimary()))
                     .toList();
         }
+    }
+
+    public static ProductVariationResponseDTO from(ProductVariation variation) {
+        return new ProductVariationResponseDTO(variation);
     }
 
 }

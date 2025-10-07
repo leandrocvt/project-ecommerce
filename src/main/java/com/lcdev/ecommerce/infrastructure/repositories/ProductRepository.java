@@ -58,14 +58,21 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                             THEN (COALESCE(fv.discount_amount,0) * 100 / (p.base_price + COALESCE(fv.price_adjustment,0)))
                         ELSE 0
                     END AS discountPercent,
-                    fi.img_url AS firstImageUrl
+                    fi.img_url AS firstImageUrl,
+                    CASE
+                        WHEN EXISTS (
+                            SELECT 1 FROM tb_product_variation v
+                            WHERE v.product_id = p.id AND v.stock_quantity > 0
+                        ) THEN true
+                        ELSE false
+                    END AS inStock
                 FROM tb_product p
                 INNER JOIN filtered_variations fv
                     ON fv.product_id = p.id AND fv.rn = 1
                 INNER JOIN first_images fi
                     ON fi.variation_id = fv.id AND fi.rn = 1
                 WHERE p.active = true
-                    AND (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
+                  AND (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
                   AND (:categoryId IS NULL OR p.category_id IN (SELECT id FROM category_tree))
             ) sub
             ORDER BY
@@ -119,5 +126,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             """)
     List<ProductVariationProjection> findProductWithVariations(@Param("productId") Long productId);
 
-    Optional<Product> findByIdAndActiveTrue(Long id);
+    @Query("""
+                SELECT COALESCE(SUM(v.stockQuantity), 0)
+                FROM ProductVariation v
+                WHERE v.product.id = :productId
+            """)
+    Integer findTotalStockByProductId(@Param("productId") Long productId);
 }

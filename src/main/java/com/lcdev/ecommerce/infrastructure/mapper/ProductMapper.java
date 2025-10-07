@@ -3,6 +3,7 @@ package com.lcdev.ecommerce.infrastructure.mapper;
 import com.lcdev.ecommerce.application.dto.product.ProductDetailsResponseDTO;
 import com.lcdev.ecommerce.application.dto.product.ProductRequestDTO;
 import com.lcdev.ecommerce.application.dto.product.ProductResponseDTO;
+import com.lcdev.ecommerce.application.dto.product.ProductUpdateDTO;
 import com.lcdev.ecommerce.domain.entities.Category;
 import com.lcdev.ecommerce.domain.entities.Product;
 import com.lcdev.ecommerce.infrastructure.projections.AssessmentProjection;
@@ -14,9 +15,8 @@ import java.util.List;
 
 public interface ProductMapper {
 
-    Product toEntity(ProductRequestDTO dto, Category category);
     ProductResponseDTO toResponseDTO(Product entity);
-    void updateBasicFields(ProductRequestDTO dto, Product entity);
+    void updateBasicFields(ProductUpdateDTO dto, Product entity);
 
     ProductDetailsResponseDTO toDetailsDTO(
             List<ProductVariationProjection> variationsProjections,

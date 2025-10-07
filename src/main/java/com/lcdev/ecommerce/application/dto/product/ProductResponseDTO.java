@@ -20,7 +20,7 @@ public class ProductResponseDTO {
     private Long categoryId;
     private Boolean active;
     private Integer stockQuantity;
-    private List<ProductVariationDTO> variations;
+    private List<ProductVariationResponseDTO> variations;
 
     public ProductResponseDTO(Product product) {
         id = product.getId();
@@ -34,7 +34,7 @@ public class ProductResponseDTO {
         if (product.getVariations() != null) {
             this.variations = product.getVariations()
                     .stream()
-                    .map(ProductVariationDTO::new)
+                    .map(ProductVariationResponseDTO::new)
                     .toList();
         }
     }

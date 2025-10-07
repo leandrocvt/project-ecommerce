@@ -33,6 +33,6 @@ public class ProductRequestDTO {
 
     @NotEmpty(message = "O produto precisa ter pelo menos uma variação!")
     @Size(min = 1, message = "O produto precisa ter pelo menos uma variação!")
-    private List<@Valid ProductVariationDTO> variations;
+    private List<@Valid ProductVariationRequestDTO> variations;
 
 }

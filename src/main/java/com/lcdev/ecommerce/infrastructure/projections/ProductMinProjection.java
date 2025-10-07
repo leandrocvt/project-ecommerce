@@ -9,4 +9,5 @@ public interface ProductMinProjection {
     BigDecimal getFinalPrice();
     BigDecimal getDiscountPercent();
     String getFirstImageUrl();
+    Boolean getInStock();
 }

@@ -12,8 +12,12 @@ import java.util.Optional;
 @Repository
 public interface ProductVariationRepository extends JpaRepository<ProductVariation, Long> {
 
-    @Query("SELECT v FROM ProductVariation v WHERE v.id = :id")
-    Optional<ProductVariation> findByIdOnly(@Param("id") Long id);
+    @Query("""
+                SELECT v FROM ProductVariation v
+                WHERE v.id = :variationId AND v.product.id = :productId
+            """)
+    Optional<ProductVariation> findByIdAndProductId(@Param("variationId") Long variationId,
+                                                    @Param("productId") Long productId);
 
     @Query("""
                 SELECT v
@@ -23,5 +27,14 @@ public interface ProductVariationRepository extends JpaRepository<ProductVariati
                 WHERE v.id IN :ids
             """)
     List<ProductVariation> findAllWithProductAndCategoryByIds(@Param("ids") List<Long> ids);
+
+    @Query("""
+                SELECT v
+                FROM ProductVariation v
+                JOIN FETCH v.product p
+                JOIN FETCH p.category c
+                WHERE v.id = :variationId AND v.product.id = :productId
+            """)
+    Optional<ProductVariation> findWithProductAndCategoryById(@Param("variationId") Long variationId, @Param("productId") Long productId);
 
 }

@@ -1,26 +1,21 @@
 package com.lcdev.ecommerce.application.service;
 
-import com.lcdev.ecommerce.application.dto.product.ProductDetailsResponseDTO;
-import com.lcdev.ecommerce.application.dto.product.ProductMinResponseDTO;
-import com.lcdev.ecommerce.application.dto.product.ProductRequestDTO;
-import com.lcdev.ecommerce.application.dto.product.ProductResponseDTO;
+import com.lcdev.ecommerce.application.dto.product.*;
 import com.lcdev.ecommerce.application.service.exceptions.BusinessException;
 import com.lcdev.ecommerce.application.service.exceptions.InactiveProductException;
 import com.lcdev.ecommerce.application.service.exceptions.ResourceNotFoundException;
 import com.lcdev.ecommerce.domain.entities.Category;
 import com.lcdev.ecommerce.domain.entities.Product;
+import com.lcdev.ecommerce.domain.entities.ProductVariation;
 import com.lcdev.ecommerce.domain.enums.Size;
+import com.lcdev.ecommerce.domain.factories.ProductFactory;
 import com.lcdev.ecommerce.infrastructure.mapper.ProductMapper;
 import com.lcdev.ecommerce.infrastructure.mapper.ProductVariationMapper;
 import com.lcdev.ecommerce.infrastructure.projections.AssessmentProjection;
 import com.lcdev.ecommerce.infrastructure.projections.ProductVariationImageProjection;
 import com.lcdev.ecommerce.infrastructure.projections.ProductVariationProjection;
 import com.lcdev.ecommerce.infrastructure.projections.ReviewSummaryProjection;
-import com.lcdev.ecommerce.infrastructure.repositories.AssessmentRepository;
-import com.lcdev.ecommerce.infrastructure.repositories.CategoryRepository;
-import com.lcdev.ecommerce.infrastructure.repositories.ProductRepository;
-import com.lcdev.ecommerce.infrastructure.repositories.ProductVariationImageRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.lcdev.ecommerce.infrastructure.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -38,44 +32,66 @@ public class ProductService {
 
     private final ProductRepository repository;
     private final ProductVariationImageRepository imageRepository;
+    private final ProductVariationRepository variationRepository;
+    private final ProductVariationMapper productVariationMapper;
     private final CategoryRepository categoryRepository;
     private final AssessmentRepository assessmentRepository;
     private final ProductMapper productMapper;
-    private final ProductVariationMapper productVariationMapper;
+    private final ProductFactory productFactory;
 
     @Transactional
-    public ProductResponseDTO save(ProductRequestDTO dto){
+    public ProductResponseDTO save(ProductRequestDTO dto) {
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + dto.getCategoryId()));
 
-        Product entity = productMapper.toEntity(dto, category);
+        Product entity = productFactory.createFromDTO(dto, category);
         validateVariations(entity);
+
         entity = repository.save(entity);
         return productMapper.toResponseDTO(entity);
     }
 
     @Transactional
-    public ProductResponseDTO update(Long id, ProductRequestDTO dto){
-        try {
-            Product entity = repository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Id not found! Id: " + id));
+    public ProductResponseDTO updateBasicInfo(Long id, ProductUpdateDTO dto) {
+        Product entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado: " + id));
 
-            productMapper.updateBasicFields(dto, entity);
+        productMapper.updateBasicFields(dto, entity);
 
-            if (Objects.nonNull(dto.getCategoryId())) {
-                Category category = categoryRepository.findById(dto.getCategoryId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Category not found. Id: " + dto.getCategoryId()));
-                entity.setCategory(category);
-            }
-
-            productVariationMapper.updateVariations(dto, entity);
-
-            entity = repository.save(entity);
-            return productMapper.toResponseDTO(entity);
-        }catch (EntityNotFoundException e){
-            throw new ResourceNotFoundException("Id not found! Id:" + id);
+        if (dto.categoryId() != null) {
+            Category category = categoryRepository.findById(dto.categoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada: " + dto.categoryId()));
+            entity.setCategory(category);
         }
+
+        return productMapper.toResponseDTO(repository.save(entity));
     }
+
+    @Transactional
+    public ProductVariationResponseDTO updateVariation(Long productId, Long variationId, ProductVariationUpdateDTO dto) {
+        ProductVariation variation = variationRepository.findByIdAndProductId(variationId, productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Variação não encontrada"));
+
+        productVariationMapper.updateEntity(dto, variation);
+        return ProductVariationResponseDTO.from(variationRepository.save(variation));
+    }
+
+    @Transactional
+    public ProductVariationResponseDTO addVariation(Long productId, ProductVariationRequestDTO dto) {
+        Product product = repository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+
+        ProductVariation variation = productVariationMapper.toEntity(dto, product);
+        return ProductVariationResponseDTO.from(variationRepository.save(variation));
+    }
+
+    @Transactional
+    public void deleteVariation(Long productId, Long variationId) {
+        ProductVariation variation = variationRepository.findByIdAndProductId(variationId, productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Variação não encontrada"));
+        variationRepository.delete(variation);
+    }
+
 
     @Transactional(readOnly = true)
     public Page<ProductMinResponseDTO> search(
@@ -102,10 +118,7 @@ public class ProductService {
         }
 
         List<ProductVariationProjection> variations = repository.findProductWithVariations(productId);
-
-        List<Long> variationIds = variations.stream()
-                .map(ProductVariationProjection::getVariationId)
-                .toList();
+        List<Long> variationIds = variations.stream().map(ProductVariationProjection::getVariationId).toList();
 
         List<ProductVariationImageProjection> images = variationIds.isEmpty()
                 ? List.of()
@@ -116,7 +129,12 @@ public class ProductService {
         List<AssessmentProjection> sample = assessmentRepository.findByProductId(
                 productId, PageRequest.of(0, 3)).getContent();
 
-        return productMapper.toDetailsDTO(variations, images, summary, sample);
+        Integer totalStock = repository.findTotalStockByProductId(productId);
+
+        ProductDetailsResponseDTO dto = productMapper.toDetailsDTO(variations, images, summary, sample);
+        dto.setStockQuantity(totalStock);
+
+        return dto;
     }
 
     private void validateVariations(Product product) {
@@ -132,6 +150,4 @@ public class ProductService {
             }
         });
     }
-
-
 }

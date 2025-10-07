@@ -4,6 +4,7 @@ import com.lcdev.ecommerce.application.dto.*;
 import com.lcdev.ecommerce.application.dto.product.ProductMinResponseDTO;
 import com.lcdev.ecommerce.application.dto.product.ProductRequestDTO;
 import com.lcdev.ecommerce.application.dto.product.ProductResponseDTO;
+import com.lcdev.ecommerce.application.dto.product.ProductUpdateDTO;
 import com.lcdev.ecommerce.application.service.ProductService;
 import com.lcdev.ecommerce.domain.enums.Size;
 import jakarta.validation.Valid;
@@ -42,8 +43,8 @@ public class ProductController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PutMapping(value = "/{id}")
-    public ResponseEntity<ProductResponseDTO> update(@Valid @RequestBody ProductRequestDTO dto, @PathVariable Long id){
-        ProductResponseDTO newDto = service.update(id, dto);
+    public ResponseEntity<ProductResponseDTO> update(@Valid @RequestBody ProductUpdateDTO dto, @PathVariable Long id){
+        ProductResponseDTO newDto = service.updateBasicInfo(id, dto);
         return ResponseEntity.ok(newDto);
     }
 

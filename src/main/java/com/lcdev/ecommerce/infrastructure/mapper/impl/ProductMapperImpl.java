@@ -13,7 +13,6 @@ import com.lcdev.ecommerce.infrastructure.projections.ReviewSummaryProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,24 +24,11 @@ public class ProductMapperImpl implements ProductMapper {
 
     private final ProductVariationMapper productVariationMapper;
 
-    @Override
-    public Product toEntity(ProductRequestDTO dto, Category category) {
-        Product entity = new Product();
-        entity.setName(dto.getName());
-        entity.setDescription(dto.getDescription());
-        entity.setBasePrice(dto.getBasePrice());
-        entity.setCategory(category);
-
-        productVariationMapper.updateVariations(dto, entity);
-
-        return entity;
-    }
-
-    public void updateBasicFields(ProductRequestDTO dto, Product entity) {
-        if (dto.getName() != null) entity.setName(dto.getName());
-        if (dto.getDescription() != null) entity.setDescription(dto.getDescription());
-        if (dto.getBasePrice() != null) entity.setBasePrice(dto.getBasePrice());
-        if (dto.getActive() != null) entity.setActive(dto.getActive());
+    public void updateBasicFields(ProductUpdateDTO dto, Product entity) {
+        if (dto.name() != null) entity.setName(dto.name());
+        if (dto.description() != null) entity.setDescription(dto.description());
+        if (dto.basePrice() != null) entity.setBasePrice(dto.basePrice());
+        if (dto.active() != null) entity.setActive(dto.active());
     }
 
     @Override
@@ -58,29 +44,31 @@ public class ProductMapperImpl implements ProductMapper {
 
         ProductVariationProjection first = variationsProjections.get(0);
 
-        // Agrupa imagens por variationId
+        // ✅ Agrupa imagens por variationId (mais eficiente)
         Map<Long, List<ProductVariationImageDTO>> imagesByVariation = imagesProjections.stream()
-                .map(img -> new ProductVariationImageDTO(img.getImageId(), img.getImgUrl(), img.getPrimary()))
                 .collect(Collectors.groupingBy(
-                        img -> imagesProjections.stream()
-                                .filter(p -> p.getImageId().equals(img.getId()))
-                                .findFirst()
-                                .get()
-                                .getVariationId(),
+                        ProductVariationImageProjection::getVariationId,
                         LinkedHashMap::new,
-                        Collectors.toList()
+                        Collectors.mapping(
+                                img -> new ProductVariationImageDTO(
+                                        img.getImageId(),
+                                        img.getImgUrl(),
+                                        img.getPrimary()
+                                ),
+                                Collectors.toList()
+                        )
                 ));
 
         // Cria variações com imagens agrupadas
-        List<ProductVariationDTO> variations = variationsProjections.stream()
-                .map(v -> new ProductVariationDTO(
+        List<ProductVariationResponseDTO> variations = variationsProjections.stream()
+                .map(v -> new ProductVariationResponseDTO(
                         v.getVariationId(),
                         v.getColor(),
                         v.getSize(),
                         v.getPriceAdjustment(),
                         v.getDiscountAmount(),
                         v.getVariationStock(),
-                        imagesByVariation.getOrDefault(v.getVariationId(), new ArrayList<>())
+                        imagesByVariation.getOrDefault(v.getVariationId(), List.of())
                 ))
                 .toList();
 
@@ -104,10 +92,9 @@ public class ProductMapperImpl implements ProductMapper {
         );
     }
 
-
     @Override
     public ProductResponseDTO toResponseDTO(Product entity) {
         return new ProductResponseDTO(entity);
     }
-
 }
+
